@@ -40,25 +40,27 @@
   .tab.on { background: #fff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,.08); }
 
   .mashq {
-    display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
-    background: #141a2e; border-radius: 22px; padding: 12px;
+    display: none; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;
+    background: #ffffff; border-radius: 22px; padding: 14px; border: 2px solid var(--line);
+    box-shadow: 0 6px 18px rgba(31,45,80,.08);
   }
   .mashq.open { display: grid; }
   .mashq-head {
-    grid-column: 1 / -1; text-align: center; color: #fff; font-size: 17px; font-weight: 800; padding: 6px 0 2px;
+    grid-column: 1 / -1; text-align: center; color: var(--text); font-size: 17px; font-weight: 800; padding: 4px 0 2px;
   }
-  .mashq-head span { display: block; font-size: 12px; font-weight: 600; color: #c9d6f0; margin-top: 2px; }
+  .mashq-head span { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 2px; }
   .mashq a {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    padding: 12px 10px; border-radius: 20px; text-decoration: none; color: #1e2846;
-    background: linear-gradient(90deg, rgba(236,242,252,.80), rgba(190,204,226,.80));
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    padding: 16px 10px; border-radius: 20px; text-decoration: none; color: #1e2846;
+    background: linear-gradient(160deg, rgba(236,242,252,.95), rgba(190,204,226,.95));
     border: 2px solid rgba(255,255,255,.95);
     box-shadow: 0 0 12px rgba(200,220,255,.45);
   }
-  .mashq .em { font-size: 22px; line-height: 1; }
-  .mashq .nm { display: block; font-weight: 800; font-size: 16px; text-align: center; }
-  .mashq .kr { display: block; font-size: 12px; font-weight: 600; color: #465578; text-align: center; margin-top: 2px; }
-  .mashq a:last-child { grid-column: 1 / -1; }
+  .mashq .em { font-size: 30px; line-height: 1; }
+  .mashq .nm { display: block; font-weight: 800; font-size: 17px; text-align: center; }
+  .mashq .kr { display: block; font-size: 13px; font-weight: 600; color: #465578; text-align: center; margin-top: 2px; }
+  .mashq a:last-child { grid-column: 1 / -1; flex-direction: row; gap: 12px; padding: 14px; }
+  .mashq a:last-child .em { font-size: 28px; }
 
   .chips {
     display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; margin: 0 -16px 6px; padding-left: 16px; padding-right: 16px;
