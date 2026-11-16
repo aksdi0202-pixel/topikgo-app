@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bo'lim · Essential Korean Words 2000</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { --bg:#f4f7fb; --text:#1d2433; --muted:#6b7385; --line:#d6dce8; --blue:#2f6fdd; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center;
+    padding: 16px 16px 32px;
+  }
+  .wrap { width: 100%; max-width: 420px; }
+  .bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 24px; margin-bottom: 14px;
+    background: linear-gradient(90deg, rgba(255,240,120,.72), rgba(255,210,50,.72));
+    border: 2px solid rgba(255,255,255,.8);
+    box-shadow: 0 8px 20px rgba(255,200,0,.25), inset 0 1px 0 rgba(255,255,255,.7);
+    backdrop-filter: blur(6px);
+  }
+  .back {
+    text-decoration: none; color: #8a6200; font-size: 26px; font-weight: 700; line-height: 1;
+    width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #fff8d6;
+    border: 2px solid #ffe27a; flex: 0 0 40px;
+  }
+  .bar h1 { margin: 0; font-size: 18px; font-weight: 800; color: #5a4300; }
+  .bar small { display: block; font-size: 13px; font-weight: 600; color: #7a5a00; margin-top: 2px; }
+
+  .tabs {
+    display: flex; gap: 4px; padding: 6px; border-radius: 20px; background: #e8ecf4; margin-bottom: 14px;
+  }
+  .tab {
+    flex: 1; text-align: center; padding: 11px 6px; border-radius: 16px; font-size: 16px; font-weight: 700;
+    color: var(--muted); text-decoration: none; border: 0; background: transparent; cursor: pointer; font-family: inherit;
+  }
+  .tab.on { background: #fff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+
+  .mashq { display: none; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .mashq.open { display: grid; }
+  .mashq a {
+    text-align: center; padding: 12px 8px; border-radius: 14px; background: #fff; border: 2px solid var(--line);
+    color: var(--text); text-decoration: none; font-weight: 700; font-size: 15px;
+  }
+  .mashq a:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+  .chips {
+    display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; margin: 0 -16px 6px; padding-left: 16px; padding-right: 16px;
+    scrollbar-width: none;
+  }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; padding: 11px 18px; border-radius: 22px; background: #fff; border: 2px solid var(--line);
+    color: var(--text); text-decoration: none; font-size: 16px; font-weight: 600; white-space: nowrap;
+  }
+  .chip.on { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
+  .hint { font-size: 13px; color: var(--muted); margin: 0; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="bar">
+      <a class="back" href="beginner.html?v=1" aria-label="Orqaga">‹</a>
+      <h1 id="title">Bo'lim<small id="range"></small></h1>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on" type="button">Ro'yxat</button>
+      <button class="tab" type="button" id="mashqBtn">Mashq ▾</button>
+      <a class="tab" href="#">Suhbat</a>
+    </div>
+
+    <div class="mashq" id="mashq">
+      <a href="#">Kartochka</a>
+      <a href="#">Test uz</a>
+      <a href="#">Test ko'</a>
+      <a href="#">Eshitish</a>
+      <a href="#">Yozish</a>
+    </div>
+
+    <div class="chips" id="chips"></div>
+    <p class="hint" id="hint"></p>
+  </div>
+
+  <script>
+    try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
+
+    // 6 bo'lim, har birida 11 ta dars (oxirgisi 10 ta). Darslar umumiy raqamlanadi: 1–65.
+    var COUNTS = [11, 11, 11, 11, 11, 10];
+    var q = parseInt(new URLSearchParams(location.search).get('q'), 10);
+    if (!(q >= 1 && q <= COUNTS.length)) q = 1;
+
+    var before = 0;
+    for (var i = 0; i < q - 1; i++) before += COUNTS[i];
+    var lo = before + 1, hi = before + COUNTS[q - 1];
+
+    document.getElementById('title').firstChild.nodeValue = q + "-qism · Boshlang'ich · 초급";
+    document.getElementById('range').textContent = lo + '–' + hi + ' darslar';
+    document.getElementById('hint').textContent = 'Qolgan darslar gorizontal sirpanadi';
+
+    var chips = document.getElementById('chips');
+    var labels = ['Barchasi'];
+    for (var n = lo; n <= hi; n++) labels.push(n + '-dars');
+    labels.forEach(function (t, idx) {
+      var a = document.createElement('a');
+      a.href = '#';
+      a.className = 'chip' + (idx === 0 ? ' on' : '');
+      a.textContent = t;
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('on'); });
+        a.classList.add('on');
+      });
+      chips.appendChild(a);
+    });
+
+    document.getElementById('mashqBtn').addEventListener('click', function () {
+      document.getElementById('mashq').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>
