@@ -160,8 +160,19 @@
     }
     render();
 
-    document.getElementById('mashqBtn').addEventListener('click', function () {
-      document.getElementById('mashq').classList.toggle('open');
+    var mashqBtn = document.getElementById('mashqBtn');
+    var mashqPanel = document.getElementById('mashq');
+    mashqBtn.addEventListener('click', function () {
+      mashqPanel.classList.toggle('open');
+    });
+    // Rejim tanlansa, tab nomi shu rejim bo'ladi (emojisiz)
+    mashqPanel.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        var nm = a.querySelector('.nm');
+        if (nm) mashqBtn.textContent = nm.textContent + ' ▾';
+        mashqPanel.classList.remove('open');
+      });
     });
   </script>
 </body>
