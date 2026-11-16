@@ -25,6 +25,7 @@
   .tmenu .btn { text-align:left; border-radius:10px; }
   .bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:12px; }
   .btn { border:1px solid #cbd5e1; background:#fff; border-radius:999px; padding:7px 12px; font-size:13px; cursor:pointer; }
+  .btn.pill { border:0; border-radius:20px; padding:10px 16px; font-size:15px; font-weight:700; color:#1d2433; box-shadow:0 3px 10px rgba(31,78,120,.25); }
   .btn.on { background:var(--acc); color:#fff; border-color:var(--acc); }
   .btn.ghost { border:0; background:transparent; color:var(--acc); padding:7px 4px; }
   .progress { font-size:13px; color:var(--muted); margin-left:auto; }
@@ -76,7 +77,7 @@
     <div class="bar"><span class="progress" id="prog" style="margin-left:0"></span></div>
     <div class="bar tools">
       <div class="twrap">
-        <button class="btn" id="timer">⏱ Timer</button>
+        <button class="btn pill" id="timer">⏱ Timer</button>
         <div id="tmenu" class="tmenu hidden">
           <button class="btn" data-sec="0">O'chiq</button>
           <button class="btn" data-sec="3">3 s</button>
@@ -84,7 +85,7 @@
           <button class="btn" data-sec="7">7 s</button>
           <button class="btn" data-sec="10">10 s</button>
         </div>
-      <button class="btn" id="shuffle" style="margin-left:auto">Aralashtirish</button>
+      <button class="btn pill" id="shuffle" style="margin-left:auto">↻ Aralashtirish</button>
       </div>
     </div>
     <div class="stage"><div id="card" class="flip"></div></div>
