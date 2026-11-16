@@ -31,6 +31,14 @@
     pointer-events: none;
   }
   .btn:active { transform: translateY(6px); box-shadow: 0 4px 0 #0a2878, 0 0 14px rgba(0,170,255,.4); }
+  .btn-yellow {
+    background: linear-gradient(90deg, #f2b705, #ffd21f); color: #2b1d00;
+    box-shadow: 0 10px 0 #8a6200, 0 0 18px rgba(255,200,0,.55), inset 0 1px 0 rgba(255,255,255,.55);
+    border: 2px solid rgba(255,240,170,.95);
+  }
+  .btn-yellow:active { box-shadow: 0 4px 0 #8a6200, 0 0 14px rgba(255,200,0,.4); }
+  .btn-yellow .btn-arrow { background: #fff8d6; color: #8a6200; border-color: #ffe27a; }
+  .btn small { display: block; font-size: 13px; font-weight: 600; opacity: .85; margin-top: 4px; }
   .btn-arrow {
     position: relative; width: 44px; height: 44px; border-radius: 50%; flex: 0 0 44px;
     display: grid; place-items: center; background: #e6f8ff; color: #005ae6; font-size: 26px; font-weight: 700;
@@ -43,6 +51,7 @@
   <p class="sub">Koreys tili lug'ati</p>
   <nav class="menu">
     <a class="btn" href="topik-sozlar.html?v=2"><span>TOPIK II · Lug'at</span><span class="btn-arrow">›</span></a>
+    <a class="btn btn-yellow" href="essential.html"><span>Essential Korean Words 2000<small>Boshlang'ich · O'rta · Yuqori</small></span><span class="btn-arrow">›</span></a>
   </nav>
   <script>
     try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
