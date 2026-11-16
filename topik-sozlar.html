@@ -9,6 +9,9 @@
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); }
   header { background:var(--acc); color:#fff; padding:14px 16px; }
+  header.hdr { display:flex; align-items:center; gap:12px; }
+  header h1 { margin:0; font-size:20px; }
+  .hback { flex:0 0 36px; width:36px; height:36px; border-radius:50%; background:#fff; color:var(--acc); text-decoration:none; font-size:24px; font-weight:700; line-height:1; display:grid; place-items:center; }
   header h1 { margin:0; font-size:18px; }
   main { max-width:560px; margin:0 auto; padding:14px; }
   .hidden { display:none !important; }
@@ -43,7 +46,7 @@
 </style>
 </head>
 <body>
-<header><h1>Topik so'zlar</h1></header>
+<header class="hdr"><a class="hback" href="index.html" aria-label="Bosh menyu">‹</a><h1>Topik so'zlar</h1></header>
 <main>
 
   <!-- Bo'limlar -->
