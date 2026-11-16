@@ -60,16 +60,16 @@
   .mashq .kr { display: block; font-size: 12px; font-weight: 600; color: #465578; text-align: center; margin-top: 2px; }
   .mashq a:last-child { grid-column: 1 / -1; }
 
-  .hint { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
-  .lessons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-  .lesson {
-    position: relative; height: 56px; border-radius: 16px; background: #fff; border: 2px solid var(--line);
-    color: var(--text); font-size: 18px; font-weight: 800; cursor: pointer; font-family: inherit;
+  .chips {
+    display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; margin: 0 -16px 6px; padding-left: 16px; padding-right: 16px;
+    scrollbar-width: none;
   }
-  .lesson.on { background: var(--blue); border-color: var(--blue); color: #fff; }
-  .lesson.on::after {
-    content: "✓"; position: absolute; top: 4px; right: 7px; font-size: 11px; font-weight: 800;
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; padding: 11px 18px; border-radius: 22px; background: #fff; border: 2px solid var(--line);
+    color: var(--text); font-size: 16px; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: inherit;
   }
+  .chip.on { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
   .summary {
     margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
     background: #141a2e; color: #fff; border-radius: 22px; padding: 12px 14px;
@@ -104,7 +104,7 @@
       <a href="#"><span class="em">✍️</span><span><span class="nm">Yozish</span><span class="kr">쓰기</span></span></a>
     </div>
 
-    <div class="lessons" id="lessons"></div>
+    <div class="chips" id="chips"></div>
     <div class="summary">
       <span id="picked">Hech narsa tanlanmadi</span>
       <a class="go" id="go" href="#" aria-disabled="true">Mashq boshlash</a>
@@ -125,28 +125,40 @@
 
     document.getElementById('title').firstChild.nodeValue = q + "-qism · Boshlang'ich · 초급";
     document.getElementById('range').textContent = lo + '–' + hi + ' darslar';
-    // Darslar: har biri alohida tugma, bir nechtasini ketma-ket tanlash mumkin
+    // Chiplar: "Barchasi" hammasini bildiradi, darslar esa bir nechtasini tanlash uchun
     var picked = [];
-    var wrap = document.getElementById('lessons');
+    var wrap = document.getElementById('chips');
     var picks = document.getElementById('picked');
     var go = document.getElementById('go');
+    var allChip = null;
 
     function render() {
       var sorted = picked.slice().sort(function (a, b) { return a - b; });
-      picks.textContent = sorted.length ? 'Tanlandi: ' + sorted.join(', ') : 'Hech narsa tanlanmadi';
+      picks.textContent = sorted.length ? 'Tanlandi: ' + sorted.join(', ') : 'Barchasi';
       go.setAttribute('aria-disabled', sorted.length ? 'false' : 'true');
+      allChip.classList.toggle('on', sorted.length === 0);
+      wrap.querySelectorAll('.chip[data-n]').forEach(function (c) {
+        c.classList.toggle('on', picked.indexOf(Number(c.dataset.n)) >= 0);
+      });
     }
+
+    allChip = document.createElement('button');
+    allChip.type = 'button';
+    allChip.className = 'chip';
+    allChip.textContent = 'Barchasi';
+    allChip.addEventListener('click', function () { picked = []; render(); });
+    wrap.appendChild(allChip);
 
     for (var n = lo; n <= hi; n++) {
       (function (num) {
         var b = document.createElement('button');
         b.type = 'button';
-        b.className = 'lesson';
-        b.textContent = num;
+        b.className = 'chip';
+        b.dataset.n = num;
+        b.textContent = num + '-dars';
         b.addEventListener('click', function () {
           var idx = picked.indexOf(num);
-          if (idx >= 0) { picked.splice(idx, 1); b.classList.remove('on'); }
-          else { picked.push(num); b.classList.add('on'); }
+          if (idx >= 0) picked.splice(idx, 1); else picked.push(num);
           render();
         });
         wrap.appendChild(b);
