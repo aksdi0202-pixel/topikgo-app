@@ -14,7 +14,14 @@
     background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center;
     padding: 16px 16px 32px;
   }
-  header { width: 100%; max-width: 420px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .bar {
+    width: 100%; max-width: 420px; display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 24px; margin-bottom: 12px;
+    background: linear-gradient(90deg, rgba(255,240,120,.72), rgba(255,210,50,.72));
+    border: 2px solid rgba(255,255,255,.8);
+    box-shadow: 0 8px 20px rgba(255,200,0,.25), inset 0 1px 0 rgba(255,255,255,.7);
+    backdrop-filter: blur(6px);
+  }
   .back {
     text-decoration: none; color: #8a6200; font-size: 26px; font-weight: 700; line-height: 1;
     width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #fff8d6;
@@ -44,10 +51,10 @@
 </style>
 </head>
 <body>
-  <header>
+  <div class="bar">
     <a class="back" href="essential.html" aria-label="Orqaga">‹</a>
     <h1>Boshlang'ich · 초급</h1>
-  </header>
+  </div>
   <p class="sub">Essential Korean Words 2000 · Qismlar</p>
   <nav class="grid">
     <a class="qism" href="#" style="--d:0s"><div class="qism-in"><span class="qism-title">1-qism</span><span class="qism-meta">11 dars</span></div></a>
