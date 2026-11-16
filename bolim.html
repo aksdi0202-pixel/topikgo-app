@@ -106,10 +106,10 @@
     try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
 
     // 6 bo'lim, har birida 11 ta dars (oxirgisi 10 ta). Darslar umumiy raqamlanadi: 1–65.
-    var LEVEL = new URLSearchParams(location.search).get('level') === 'o' ? 'o' : 'b';
-    var COUNTS = LEVEL === 'o' ? [10, 9, 9, 9, 9, 9] : [11, 11, 11, 11, 11, 10];
-    var UNIT = LEVEL === 'o' ? 'kun' : 'qism';
-    var LEVEL_NAME = LEVEL === 'o' ? "O'rta · 중급" : "Boshlang'ich · 초급";
+    var LEVEL = new URLSearchParams(location.search).get('level') || 'b';
+    var COUNTS = LEVEL === 'o' ? [10, 9, 9, 9, 9, 9] : LEVEL === 'h' ? [5, 5, 5, 5, 5, 5, 5, 5, 5, 5] : [11, 11, 11, 11, 11, 10];
+    var UNIT = LEVEL === 'o' ? 'kun' : LEVEL === 'h' ? 'guruh' : 'qism';
+    var LEVEL_NAME = LEVEL === 'o' ? "O'rta · 중급" : LEVEL === 'h' ? "2000 hancha" : "Boshlang'ich · 초급";
     var q = parseInt(new URLSearchParams(location.search).get('q'), 10);
     if (!(q >= 1 && q <= COUNTS.length)) q = 1;
 
@@ -119,6 +119,10 @@
 
     document.getElementById('title').firstChild.nodeValue = q + '-' + UNIT + ' · ' + LEVEL_NAME;
     document.getElementById('range').textContent = lo + '–' + hi + ' darslar';
+    if (LEVEL === 'h') {
+      document.getElementById('back').setAttribute('href', 'hancha.html?v=1');
+      document.querySelector('.bar').style.background = 'linear-gradient(90deg, rgba(120,170,220,.72), rgba(31,78,120,.72))';
+    }
     if (LEVEL === 'o') {
       document.getElementById('back').setAttribute('href', 'orta.html?v=1');
       document.querySelector('.bar').style.background = 'linear-gradient(90deg, rgba(120,220,140,.72), rgba(40,160,80,.72))';
