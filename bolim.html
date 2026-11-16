@@ -70,16 +70,6 @@
     color: var(--text); font-size: 16px; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: inherit;
   }
   .chip.on { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
-  .summary {
-    margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    background: #141a2e; color: #fff; border-radius: 22px; padding: 12px 14px;
-  }
-  .summary #picked { font-size: 15px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .go {
-    flex: 0 0 auto; padding: 10px 14px; border-radius: 18px; background: #eef4fc; color: #1e2846;
-    text-decoration: none; font-size: 14px; font-weight: 800;
-  }
-  .go[aria-disabled="true"] { opacity: .45; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -105,10 +95,6 @@
     </div>
 
     <div class="chips" id="chips"></div>
-    <div class="summary">
-      <span id="picked">Hech narsa tanlanmadi</span>
-      <a class="go" id="go" href="#" aria-disabled="true">Mashq boshlash</a>
-    </div>
   </div>
 
   <script>
@@ -128,15 +114,10 @@
     // Chiplar: "Barchasi" hammasini bildiradi, darslar esa bir nechtasini tanlash uchun
     var picked = [];
     var wrap = document.getElementById('chips');
-    var picks = document.getElementById('picked');
-    var go = document.getElementById('go');
     var allChip = null;
 
     function render() {
-      var sorted = picked.slice().sort(function (a, b) { return a - b; });
-      picks.textContent = sorted.length ? 'Tanlandi: ' + sorted.join(', ') : 'Barchasi';
-      go.setAttribute('aria-disabled', sorted.length ? 'false' : 'true');
-      allChip.classList.toggle('on', sorted.length === 0);
+      allChip.classList.toggle('on', picked.length === 0);
       wrap.querySelectorAll('.chip[data-n]').forEach(function (c) {
         c.classList.toggle('on', picked.indexOf(Number(c.dataset.n)) >= 0);
       });
