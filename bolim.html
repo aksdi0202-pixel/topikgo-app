@@ -75,7 +75,7 @@
 <body>
   <div class="wrap">
     <div class="bar">
-      <a class="back" href="beginner.html?v=1" aria-label="Orqaga">‹</a>
+      <a class="back" id="back" href="beginner.html?v=1" aria-label="Orqaga">‹</a>
       <h1 id="title">Bo'lim<small id="range"></small></h1>
     </div>
 
@@ -101,7 +101,10 @@
     try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
 
     // 6 bo'lim, har birida 11 ta dars (oxirgisi 10 ta). Darslar umumiy raqamlanadi: 1–65.
-    var COUNTS = [11, 11, 11, 11, 11, 10];
+    var LEVEL = new URLSearchParams(location.search).get('level') === 'o' ? 'o' : 'b';
+    var COUNTS = LEVEL === 'o' ? [10, 9, 9, 9, 9, 9] : [11, 11, 11, 11, 11, 10];
+    var UNIT = LEVEL === 'o' ? 'kun' : 'qism';
+    var LEVEL_NAME = LEVEL === 'o' ? "O'rta · 중급" : "Boshlang'ich · 초급";
     var q = parseInt(new URLSearchParams(location.search).get('q'), 10);
     if (!(q >= 1 && q <= COUNTS.length)) q = 1;
 
@@ -109,8 +112,13 @@
     for (var i = 0; i < q - 1; i++) before += COUNTS[i];
     var lo = before + 1, hi = before + COUNTS[q - 1];
 
-    document.getElementById('title').firstChild.nodeValue = q + "-qism · Boshlang'ich · 초급";
+    document.getElementById('title').firstChild.nodeValue = q + '-' + UNIT + ' · ' + LEVEL_NAME;
     document.getElementById('range').textContent = lo + '–' + hi + ' darslar';
+    if (LEVEL === 'o') {
+      document.getElementById('back').setAttribute('href', 'orta.html?v=1');
+      document.querySelector('.bar').style.background = 'linear-gradient(90deg, rgba(120,220,140,.72), rgba(40,160,80,.72))';
+    }
+
     // Chiplar: "Barchasi" hammasini bildiradi, darslar esa bir nechtasini tanlash uchun
     var picked = [];
     var wrap = document.getElementById('chips');
