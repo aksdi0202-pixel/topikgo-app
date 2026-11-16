@@ -60,17 +60,26 @@
   .mashq .kr { display: block; font-size: 12px; font-weight: 600; color: #465578; text-align: center; margin-top: 2px; }
   .mashq a:last-child { grid-column: 1 / -1; }
 
-  .chips {
-    display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; margin: 0 -16px 6px; padding-left: 16px; padding-right: 16px;
-    scrollbar-width: none;
+  .hint { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
+  .lessons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .lesson {
+    position: relative; height: 56px; border-radius: 16px; background: #fff; border: 2px solid var(--line);
+    color: var(--text); font-size: 18px; font-weight: 800; cursor: pointer; font-family: inherit;
   }
-  .chips::-webkit-scrollbar { display: none; }
-  .chip {
-    flex: 0 0 auto; padding: 11px 18px; border-radius: 22px; background: #fff; border: 2px solid var(--line);
-    color: var(--text); text-decoration: none; font-size: 16px; font-weight: 600; white-space: nowrap;
+  .lesson.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .lesson.on::after {
+    content: "✓"; position: absolute; top: 4px; right: 7px; font-size: 11px; font-weight: 800;
   }
-  .chip.on { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
-  .hint { font-size: 13px; color: var(--muted); margin: 0; }
+  .summary {
+    margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: #141a2e; color: #fff; border-radius: 22px; padding: 12px 14px;
+  }
+  .summary #picked { font-size: 15px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .go {
+    flex: 0 0 auto; padding: 10px 14px; border-radius: 18px; background: #eef4fc; color: #1e2846;
+    text-decoration: none; font-size: 14px; font-weight: 800;
+  }
+  .go[aria-disabled="true"] { opacity: .45; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -95,8 +104,11 @@
       <a href="#"><span class="em">✍️</span><span><span class="nm">Yozish</span><span class="kr">쓰기</span></span></a>
     </div>
 
-    <div class="chips" id="chips"></div>
-    <p class="hint" id="hint"></p>
+    <div class="lessons" id="lessons"></div>
+    <div class="summary">
+      <span id="picked">Hech narsa tanlanmadi</span>
+      <a class="go" id="go" href="#" aria-disabled="true">Mashq boshlash</a>
+    </div>
   </div>
 
   <script>
@@ -113,23 +125,34 @@
 
     document.getElementById('title').firstChild.nodeValue = q + "-qism · Boshlang'ich · 초급";
     document.getElementById('range').textContent = lo + '–' + hi + ' darslar';
-    document.getElementById('hint').textContent = 'Qolgan darslar gorizontal sirpanadi';
+    // Darslar: har biri alohida tugma, bir nechtasini ketma-ket tanlash mumkin
+    var picked = [];
+    var wrap = document.getElementById('lessons');
+    var picks = document.getElementById('picked');
+    var go = document.getElementById('go');
 
-    var chips = document.getElementById('chips');
-    var labels = ['Barchasi'];
-    for (var n = lo; n <= hi; n++) labels.push(n + '-dars');
-    labels.forEach(function (t, idx) {
-      var a = document.createElement('a');
-      a.href = '#';
-      a.className = 'chip' + (idx === 0 ? ' on' : '');
-      a.textContent = t;
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('on'); });
-        a.classList.add('on');
-      });
-      chips.appendChild(a);
-    });
+    function render() {
+      var sorted = picked.slice().sort(function (a, b) { return a - b; });
+      picks.textContent = sorted.length ? 'Tanlandi: ' + sorted.join(', ') : 'Hech narsa tanlanmadi';
+      go.setAttribute('aria-disabled', sorted.length ? 'false' : 'true');
+    }
+
+    for (var n = lo; n <= hi; n++) {
+      (function (num) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'lesson';
+        b.textContent = num;
+        b.addEventListener('click', function () {
+          var idx = picked.indexOf(num);
+          if (idx >= 0) { picked.splice(idx, 1); b.classList.remove('on'); }
+          else { picked.push(num); b.classList.add('on'); }
+          render();
+        });
+        wrap.appendChild(b);
+      })(n);
+    }
+    render();
 
     document.getElementById('mashqBtn').addEventListener('click', function () {
       document.getElementById('mashq').classList.toggle('open');
