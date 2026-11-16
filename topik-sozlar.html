@@ -17,6 +17,9 @@
   .sec:active { transform:translateY(4px); box-shadow:0 2px 0 #c9dcf5; }
   .sec b { display:block; font-size:16px; font-weight:800; margin-bottom:6px; color:#142a5a; }
   .sec span { color:#005ae6; font-size:13px; font-weight:600; }
+  .twrap { position:relative; display:inline-block; }
+  .tmenu { position:absolute; top:calc(100% + 6px); left:0; z-index:5; background:#fff; border:1px solid #cbd5e1; border-radius:14px; padding:6px; display:flex; flex-direction:column; gap:4px; box-shadow:0 8px 20px rgba(0,0,0,.12); min-width:120px; }
+  .tmenu .btn { text-align:left; border-radius:10px; }
   .bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:12px; }
   .btn { border:1px solid #cbd5e1; background:#fff; border-radius:999px; padding:7px 12px; font-size:13px; cursor:pointer; }
   .btn.on { background:var(--acc); color:#fff; border-color:var(--acc); }
@@ -67,6 +70,16 @@
       <button class="btn" data-pos="Sifat">Sifat</button>
       <button class="btn" data-pos="Ibora">Ibora</button>
       <button class="btn" id="shuffle">Aralashtirish</button>
+      <div class="twrap">
+        <button class="btn" id="timer">⏱ Timer</button>
+        <div id="tmenu" class="tmenu hidden">
+          <button class="btn" data-sec="0">O'chiq</button>
+          <button class="btn" data-sec="3">3 s</button>
+          <button class="btn" data-sec="5">5 s</button>
+          <button class="btn" data-sec="7">7 s</button>
+          <button class="btn" data-sec="10">10 s</button>
+        </div>
+      </div>
     </div>
     <div class="bar"><span class="progress" id="prog" style="margin-left:0"></span></div>
     <div class="stage"><div id="card" class="flip"></div></div>
@@ -195,11 +208,12 @@ document.getElementById('card').onclick = () => {
   document.getElementById('card').classList.toggle('back', flipped);
 };
 
-function go(d) {
+function go(d, manual = true) {
   if (!list.length) return;
   idx = (idx + d + list.length) % list.length;
   flipped = false;
   render();
+  if (manual && autoSec) runAuto();
 }
 document.getElementById('next').onclick = () => go(1);
 document.getElementById('prev').onclick = () => go(-1);
@@ -241,6 +255,37 @@ document.getElementById('shuffle').onclick = () => {
   sideOf = list.map(() => Math.random() < 0.5 ? 'ku' : 'uk');
   idx = 0; flipped = false; render();
 };
+
+// ---- Avto-aylanish (Timer) ----
+let autoSec = 0;
+let autoTimers = [];
+const tBtn = document.getElementById('timer');
+const tMenu = document.getElementById('tmenu');
+function clearAuto() { autoTimers.forEach(clearTimeout); autoTimers = []; }
+function setCardBack(b) { flipped = b; document.getElementById('card').classList.toggle('back', b); }
+function runAuto() {
+  clearAuto();
+  if (!autoSec) return;
+  const t = autoSec * 1000;
+  autoTimers.push(setTimeout(() => {
+    setCardBack(true);                       // orqasi aylanadi
+    autoTimers.push(setTimeout(() => {
+      setCardBack(false);                    // joyiga qaytadi
+      autoTimers.push(setTimeout(() => { go(1, false); runAuto(); }, 500)); // keyingi so'z
+    }, t));
+  }, t));
+}
+function updateTimerLabel() { tBtn.textContent = autoSec ? '⏱ ' + autoSec + ' s' : '⏱ Timer'; tBtn.classList.toggle('on', !!autoSec); }
+tBtn.onclick = (e) => { e.stopPropagation(); tMenu.classList.toggle('hidden'); };
+tMenu.querySelectorAll('button').forEach(b => b.onclick = (e) => {
+  e.stopPropagation();
+  autoSec = +b.dataset.sec;
+  tMenu.classList.add('hidden');
+  updateTimerLabel();
+  if (autoSec) runAuto(); else clearAuto();
+});
+document.addEventListener('click', () => tMenu.classList.add('hidden'));
+document.getElementById('back').addEventListener('click', () => { clearAuto(); autoSec = 0; updateTimerLabel(); });
 </script>
 </body>
 </html>
