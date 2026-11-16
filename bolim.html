@@ -42,7 +42,7 @@
   .tabwrap { flex: 1; position: relative; display: flex; }
   .tabwrap .tab { width: 100%; }
   .mashq {
-    display: none; position: absolute; top: calc(100% + 8px); right: 0; z-index: 10;
+    display: none; position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 10;
     width: 260px; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px;
     background: #fff; border-radius: 16px; border: 2px solid var(--line);
     box-shadow: 0 8px 22px rgba(31,45,80,.14);
@@ -87,8 +87,8 @@
       <div class="tabwrap">
         <button class="tab" type="button" id="mashqBtn">Mashq ▾</button>
         <div class="mashq" id="mashq">
-      <a href="#"><span class="em">🇰🇷➡️🇺🇿</span><span><span class="nm">Kor → Uz</span><span class="kr">카드 (한→우)</span></span></a>
-      <a href="#"><span class="em">🇺🇿➡️🇰🇷</span><span><span class="nm">Uz → Kor</span><span class="kr">카드 (우→한)</span></span></a>
+      <a href="#"><span class="em">🃏</span><span><span class="nm">Kor → Uz</span><span class="kr">카드 (한→우)</span></span></a>
+      <a href="#"><span class="em">🃏</span><span><span class="nm">Uz → Kor</span><span class="kr">카드 (우→한)</span></span></a>
       <a href="#"><span class="em">✅</span><span><span class="nm">Test uz</span><span class="kr">시험 (uz)</span></span></a>
       <a href="#"><span class="em">📝</span><span><span class="nm">Test kor</span><span class="kr">시험 (한국어)</span></span></a>
       <a href="#"><span class="em">🎧</span><span><span class="nm">Eshitish</span><span class="kr">듣기</span></span></a>
