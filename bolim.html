@@ -70,6 +70,11 @@
     color: var(--text); font-size: 16px; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: inherit;
   }
   .chip.on { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
+    opacity: .22;
+  }
 </style>
 </head>
 <body>

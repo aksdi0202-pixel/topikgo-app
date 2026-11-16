@@ -48,6 +48,11 @@
     background: linear-gradient(160deg, #141e5a, #3c50aa); color: #fff;
     box-shadow: 0 10px 0 #070d2e, 0 0 18px rgba(60,80,170,.55);
   }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
+    opacity: .22;
+  }
 </style>
 </head>
 <body>

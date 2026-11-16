@@ -48,6 +48,11 @@
   .qism-title { font-size: 24px; font-weight: 800; color: #1d2433; }
   .qism-meta { font-size: 15px; color: var(--muted); margin-top: 10px; }
   .qism:active { transform: translateY(3px); }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
+    opacity: .22;
+  }
 </style>
 </head>
 <body>
