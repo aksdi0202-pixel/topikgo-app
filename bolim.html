@@ -129,13 +129,19 @@
   .dprog { font-weight:800; color:var(--muted); }
   .dtmenu { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; width:100%; }
   .dtmenu.hidden { display:none; }
-  .dstage { perspective:900px; height:240px; margin:8px 0 10px; }
+  .dstage { perspective:900px; height:360px; margin:8px 0 10px; }
   .dflip { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .45s; cursor:pointer; }
   .dflip.back { transform:rotateY(180deg); }
   .dface { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; background:#fff; border-radius:20px; box-shadow:0 4px 14px rgba(31,45,80,.12); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; }
-  .dback { transform:rotateY(180deg); background:#eaf3ff; }
+  .dback { transform:rotateY(180deg); background:#eaf3ff; justify-content:flex-start; overflow:auto; }
+  .dk-w { font-size:30px; font-weight:800; color:#142a5a; margin-bottom:4px; }
+  .dk-syl { font-size:17px; font-weight:700; color:#2f6fdd; line-height:1.5; }
+  .dk-uz { font-size:20px; font-weight:800; color:#142a5a; margin-top:4px; }
+  .dk-sent { font-size:16px; margin-top:12px; color:var(--text); line-height:1.5; }
+  .dk-tr { font-size:14px; color:var(--muted); margin-top:4px; line-height:1.5; }
+  .dk-tr.hide { display:none; }
+  .dk-tb { margin-top:10px; }
   .dtxt { font-size:34px; font-weight:800; line-height:1.3; }
-  .dback .dtxt { font-size:24px; color:#142a5a; }
   .dhint { margin-top:10px; font-size:12px; color:var(--muted); }
   .dnav { display:flex; gap:8px; justify-content:center; }
   body::before {
@@ -345,6 +351,51 @@
       ['서양인',"g'arblik",['서양','인'],["G'arb",'odam']],
       ['부인','xonim',['부','인'],['ayol','odam']]
     ];
+
+    // Har bir so'z uchun misol gap (koreyscha) va tarjimasi (o'zbekcha)
+    var SENT = [
+      ['인간은 생각할 수 있다.', 'Inson fikrlay oladi.'],
+      ['이 꽃은 인공 꽃이다.', "Bu gul sun'iy gul."],
+      ['서울의 인구는 많다.', "Seulning aholisi ko'p."],
+      ['인권은 중요하다.', 'Inson huquqi muhim.'],
+      ['이 노래는 인기가 많다.', "Bu qo'shiq juda mashhur."],
+      ['회사에 인력이 부족하다.', 'Kompaniyada ishchi kuch yetishmaydi.'],
+      ['아침에 친구에게 인사했다.', "Ertalab do'stimga salom berdim."],
+      ['인생은 짧다.', 'Hayot qisqa.'],
+      ['그는 회사의 인재다.', "U kompaniyaning iqtidorli odami."],
+      ['아이가 인형을 안고 잔다.', "Bola qo'g'irchoqni quchoqlab uxlaydi."],
+      ['인격은 행동으로 드러난다.', "Shaxsiyat xulqda namoyon bo'ladi."],
+      ['인도로 걸어가세요.', "Trotuar bo'ylab yuring."],
+      ['인류는 발전해 왔다.', 'Insoniyat rivojlanib keldi.'],
+      ['그는 역사적 인물이다.', 'U tarixiy shaxs.'],
+      ['인삼차를 마셨다.', 'Jen-sen choyi ichdim.'],
+      ['그 사람의 인상이 좋다.', "U odamning qiyofasi yoqimli."],
+      ['시골 인심이 좋다.', "Qishloqda mehr-oqibat yaxshi."],
+      ['인원이 다 찼다.', "Odamlar soni to'ldi."],
+      ['인종이 다양하다.', 'Irqlar xilma-xil.'],
+      ['인체는 복잡하다.', 'Inson tanasi murakkab.'],
+      ['개인 시간이 필요하다.', 'Shaxsiy vaqt kerak.'],
+      ['군인은 나라를 지킨다.', 'Askar mamlakatni himoya qiladi.'],
+      ['노인이 길을 건넌다.', "Keksa odam ko'chadan o'tyapti."],
+      ['그는 외국인이다.', 'U chet ellik.'],
+      ['나는 한국인이 아니다.', 'Men koreys emasman.'],
+      ['그녀는 미국인이다.', 'U amerikalik.'],
+      ['이 집의 주인은 누구입니까?', "Bu uyning egasi kim?"],
+      ['그는 성인이 되었다.', 'U voyaga yetdi.'],
+      ['그는 유명한 연예인이다.', "U mashhur san'atkor."],
+      ['장애인을 도와줘야 한다.', 'Nogironlarga yordam berish kerak.'],
+      ['직장인은 바쁘다.', 'Ofis xodimlari band.'],
+      ['그는 시인이다.', 'U shoir.'],
+      ['두 사람은 연인이다.', 'Ikki kishi sevishganlar.'],
+      ['지식인은 책을 많이 읽는다.', "Ziyolilar ko'p kitob o'qiydi."],
+      ['정치인이 연설했다.', "Siyosatchi nutq so'zladi."],
+      ['그녀는 정말 미인이다.', "U haqiqatan go'zal."],
+      ['범인이 잡혔다.', "Jinoyatchi qo'lga tushdi."],
+      ['동양인은 젓가락을 쓴다.', "Sharqliklar cho'p ishlatadi."],
+      ['서양인은 포크를 쓴다.', "G'arbliklar vilka ishlatadi."],
+      ['그분은 제 부인입니다.', 'U mening xotinim.']
+    ];
+    W.forEach(function (x, i) { x[4] = SENT[i]; });
     var ALLSYL = {};
     W.forEach(function (x) { x[2].forEach(function (c) { ALLSYL[c] = true; }); });
     var DISTR = ['바','나','모','서','로','타','쿠','퍼','버','테','호','루'].filter(function (c) { return !ALLSYL[c]; });
@@ -551,10 +602,33 @@
     function clearDeckTimers() { DK.timers.forEach(clearTimeout); DK.timers = []; }
     function dkSideFor(i) { return DK.dir === 'mix' ? DK.side[i] : DK.dir; }
     function dkRender() {
-      var it = W[DK.list[DK.idx]];
-      var s2 = dkSideFor(DK.list[DK.idx]);
+      var i = DK.list[DK.idx];
+      var it = W[i];
+      var s2 = dkSideFor(i);
       document.getElementById('dfront').textContent = s2 === 'ku' ? it[0] : it[1];
-      document.getElementById('dback').textContent = s2 === 'ku' ? it[1] : it[0];
+      var back = document.getElementById('dback');
+      back.innerHTML = '';
+      if (s2 === 'uk') {
+        var kw = document.createElement('div'); kw.className = 'dk-w'; kw.textContent = it[0]; back.appendChild(kw);
+      }
+      it[2].forEach(function (c, j) {
+        var sy = document.createElement('div'); sy.className = 'dk-syl';
+        sy.textContent = c + ' — ' + it[3][j];
+        back.appendChild(sy);
+      });
+      if (s2 === 'ku') {
+        var uz = document.createElement('div'); uz.className = 'dk-uz'; uz.textContent = it[1]; back.appendChild(uz);
+      }
+      var se = document.createElement('div'); se.className = 'dk-sent'; se.textContent = it[4][0]; back.appendChild(se);
+      var tr = document.createElement('div'); tr.className = 'dk-tr'; tr.textContent = it[4][1]; back.appendChild(tr);
+      var tb = document.createElement('button');
+      tb.type = 'button'; tb.className = 'dbtn alt dk-tb'; tb.textContent = 'Tarjimani yashirish';
+      tb.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var hid = tr.classList.toggle('hide');
+        tb.textContent = hid ? "Tarjimani ko'rsatish" : 'Tarjimani yashirish';
+      });
+      back.appendChild(tb);
       document.getElementById('dcard').classList.toggle('back', DK.flipped);
       document.getElementById('dprog').textContent = (DK.idx + 1) + ' / ' + DK.list.length;
     }
@@ -706,7 +780,11 @@
       yz.querySelector('.kr').textContent = '단어 만들기';
       if (q === 1) {
         var mitems = document.querySelectorAll('#mashq a');
-        var modes = ['kk', 'ku', 'tu', 'tk', 'es'];
+        mitems[1].remove();
+        mitems = document.querySelectorAll('#mashq a');
+        mitems[0].querySelector('.nm').textContent = 'Kartochka';
+        mitems[0].querySelector('.kr').textContent = '카드';
+        var modes = ['kk', 'tu', 'tk', 'es'];
         for (var mi = 0; mi < modes.length; mi++) mitems[mi].dataset.mode = modes[mi];
         document.getElementById('anchor').style.display = 'block';
         document.getElementById('seg').style.display = 'flex';
