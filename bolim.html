@@ -231,13 +231,9 @@
         <div class="suh-sent" id="suhSent"></div>
         <div class="suh-tr" id="suhTr"></div>
       </div>
-      <div class="dbar"><span class="dprog" id="suhProg"></span></div>
-      <div class="dnav">
-        <button type="button" class="dbtn" id="suhPrev">← Oldingi</button>
-        <button type="button" class="dbtn" id="suhNext">Keyingi →</button>
-      </div>
-      <div style="margin-top:12px; text-align:center;">
-        <button type="button" class="dbtn alt" id="suhList">← Ro'yxat</button>
+      <div class="dnav" style="margin-top:12px">
+        <button type="button" class="dbtn" id="suhPrev">Ortga</button>
+        <button type="button" class="dbtn" id="suhNext">Keyingi</button>
       </div>
     </div>
 
@@ -512,7 +508,6 @@
     document.getElementById('suhPrev').addEventListener('click', function () { SUH.idx = (SUH.idx - 1 + W.length) % W.length; suhRender(); });
     document.getElementById('suhNext').addEventListener('click', function () { SUH.idx = (SUH.idx + 1) % W.length; suhRender(); });
     document.getElementById('suhHide').addEventListener('click', function () { SUH.hidden = !SUH.hidden; suhRender(); });
-    document.getElementById('suhList').addEventListener('click', showList);
 
     // Ro'yxat: oldiga va orqaga qo'shiluvchilar
     var WL = {
@@ -829,11 +824,13 @@
 
     var mashqBtn = document.getElementById('mashqBtn');
     var mashqPanel = document.getElementById('mashq');
-    document.querySelector('.tabs > .tab').addEventListener('click', function () { if (LEVEL === 'h' && q === 1) showList(); });
+    document.querySelector('.tabs > .tab').addEventListener('click', function () {
+      if (LEVEL === 'h' && q === 1) { document.querySelectorAll('.tabs .tab').forEach(function (t) { t.classList.remove('on'); }); this.classList.add('on'); showList(); }
+    });
     var suhTab = document.querySelector('.tabs > a.tab');
     if (suhTab) suhTab.addEventListener('click', function (e) {
       e.preventDefault();
-      if (LEVEL === 'h' && q === 1) startSuh();
+      if (LEVEL === 'h' && q === 1) { document.querySelectorAll('.tabs .tab').forEach(function (t) { t.classList.remove('on'); }); suhTab.classList.add('on'); startSuh(); }
     });
     mashqBtn.addEventListener('click', function () {
       mashqPanel.classList.toggle('open');
