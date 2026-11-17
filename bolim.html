@@ -68,6 +68,23 @@
     color: var(--text); font-size: 16px; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: inherit;
   }
   .chip.on { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
+
+  .anchor { text-align:center; padding:16px 14px 12px; margin-bottom:12px; border-radius:22px; background:#fff; border:2px solid var(--line); }
+  .anchor .ch { font-size:60px; font-weight:800; line-height:1.1; }
+  .anchor .meta { font-size:14px; color:var(--muted); margin-top:6px; line-height:1.6; }
+  .game { display:none; background:#fff; border:2px solid var(--line); border-radius:22px; padding:16px; }
+  .game.on { display:block; }
+  .game .prompt { font-size:20px; font-weight:800; text-align:center; margin:2px 0 14px; }
+  .tiles { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+  .tile { padding:12px 0; border-radius:14px; border:2px solid var(--line); background:#f4f7fb; font-size:20px; font-weight:800; font-family:inherit; color:var(--text); cursor:pointer; }
+  .tile:disabled { opacity:.3; cursor:default; }
+  .built { min-height:48px; margin:14px 0 6px; text-align:center; font-size:26px; font-weight:800; letter-spacing:4px; }
+  .fb { min-height:44px; text-align:center; font-size:15px; font-weight:600; line-height:1.6; }
+  .fb.ok { color:#1f8a4c; }
+  .fb.no { color:#c0392b; }
+  .btns { display:flex; gap:8px; justify-content:center; margin-top:10px; }
+  .btns button { padding:10px 16px; border-radius:14px; border:0; font-family:inherit; font-weight:700; background:var(--blue); color:#fff; cursor:pointer; }
+  .btns button.alt { background:#e8ecf4; color:var(--text); }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
@@ -100,6 +117,22 @@
 
 
     <div class="chips" id="chips"></div>
+
+    <div class="anchor" id="anchor" style="display:none">
+      <div class="ch">인</div>
+      <div class="meta">o'qilishi: in<br>koreyscha: 사람<br>o'zbekcha: odam, inson</div>
+    </div>
+
+    <div class="game" id="game">
+      <div class="prompt" id="prompt"></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="built" id="built"></div>
+      <div class="fb" id="fb"></div>
+      <div class="btns">
+        <button type="button" class="alt" id="undo">⌫ Orqaga</button>
+        <button type="button" id="next">Keyingi</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -164,6 +197,85 @@
     }
     render();
 
+
+    // ---- Hanja: 'So'z yasash' o'yini (faqat 2000 hancha bo'limi) ----
+    var BUILD = [
+      { w: '외국인', s: ['외', '국', '인'], uz: 'chet ellik' },
+      { w: '한국인', s: ['한', '국', '인'], uz: 'koreys' },
+      { w: '미국인', s: ['미', '국', '인'], uz: 'amerikalik' },
+      { w: '인사',   s: ['인', '사'],       uz: 'salomlashish' }
+    ];
+    var SYL = { '외': 'tashqi, chet', '국': 'davlat', '인': 'odam, inson' };
+    var DISTR = ['바', '나', '도', '가', '모', '서', '로', '료'];
+    var cur = null, seqIdx = [], tileBtns = [];
+
+    function shuffle(a) { return a.slice().sort(function () { return Math.random() - 0.5; }); }
+
+    function renderBuilt() {
+      document.getElementById('built').textContent = seqIdx.map(function (i) { return tileBtns[i].textContent; }).join(' ');
+    }
+
+    function newRound() {
+      cur = BUILD[Math.floor(Math.random() * BUILD.length)];
+      seqIdx = [];
+      var pool = shuffle(cur.s.concat(shuffle(DISTR).slice(0, 10 - cur.s.length)));
+      var box = document.getElementById('tiles');
+      box.innerHTML = '';
+      tileBtns = pool.map(function (ch, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tile';
+        b.textContent = ch;
+        b.addEventListener('click', function () {
+          if (seqIdx.length >= cur.s.length || b.disabled) return;
+          seqIdx.push(i);
+          b.disabled = true;
+          renderBuilt();
+          if (seqIdx.length === cur.s.length) check();
+        });
+        box.appendChild(b);
+        return b;
+      });
+      document.getElementById('prompt').textContent = cur.uz;
+      document.getElementById('built').textContent = '';
+      var fb = document.getElementById('fb');
+      fb.textContent = '';
+      fb.className = 'fb';
+    }
+
+    function check() {
+      var fb = document.getElementById('fb');
+      var made = seqIdx.map(function (i) { return tileBtns[i].textContent; }).join('');
+      if (made === cur.w) {
+        var parts = cur.s.filter(function (c) { return SYL[c]; }).map(function (c) { return c + ' — ' + SYL[c]; });
+        fb.className = 'fb ok';
+        fb.innerHTML = cur.w + ' ✔<br>' + parts.join(' · ');
+      } else {
+        fb.className = 'fb no';
+        fb.textContent = 'Bunday so\'z yo\'q. Orqaga qaytib qayta urining.';
+      }
+    }
+
+    document.getElementById('undo').addEventListener('click', function () {
+      if (!seqIdx.length) return;
+      var last = seqIdx.pop();
+      tileBtns[last].disabled = false;
+      renderBuilt();
+      var fb = document.getElementById('fb');
+      fb.textContent = ''; fb.className = 'fb';
+    });
+    document.getElementById('next').addEventListener('click', newRound);
+
+    if (LEVEL === 'h') {
+      // Hanja bo'limida "Yozish" o'rniga "So'z yasash"
+      var yz = document.querySelector('#mashq a:last-child');
+      yz.dataset.mode = 'build';
+      yz.querySelector('.em').textContent = '🧩';
+      yz.querySelector('.nm').textContent = "So'z yasash";
+      yz.querySelector('.kr').textContent = '단어 만들기';
+      if (q === 1) document.getElementById('anchor').style.display = 'block';
+    }
+
     var mashqBtn = document.getElementById('mashqBtn');
     var mashqPanel = document.getElementById('mashq');
     mashqBtn.addEventListener('click', function () {
@@ -176,6 +288,10 @@
         var nm = a.querySelector('.nm');
         if (nm) mashqBtn.textContent = nm.textContent + ' ▾';
         mashqPanel.classList.remove('open');
+        if (a.dataset.mode === 'build') {
+          document.getElementById('game').classList.add('on');
+          newRound();
+        }
       });
     });
   </script>
