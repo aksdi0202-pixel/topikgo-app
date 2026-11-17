@@ -90,10 +90,13 @@
   .seg button { flex:1; padding:10px 6px; border:0; border-radius:12px; background:transparent; font-family:inherit; font-size:15px; font-weight:700; color:var(--muted); cursor:pointer; }
   .seg button.on { background:#fff; color:var(--text); box-shadow:0 2px 6px rgba(0,0,0,.08); }
   .wl { background:#fff; border:2px solid var(--line); border-radius:20px; padding:6px 14px; margin-bottom:12px; }
-  .wl .row { display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:10px 0; border-bottom:1px solid #eef1f7; }
+  .wl .row { display:grid; grid-template-columns:86px 40px 1fr 34px; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid #eef1f7; }
   .wl .row:last-child { border-bottom:0; }
-  .wl .kr { font-size:20px; font-weight:800; }
-  .wl .uz { font-size:14px; color:var(--muted); text-align:right; }
+  .wl .kr { font-size:20px; font-weight:800; white-space:nowrap; }
+  .wl .sp { width:36px; height:36px; border-radius:50%; border:0; background:#e8eefc; color:#2f6fdd; font-size:16px; cursor:pointer; display:grid; place-items:center; }
+  .wl .uz { font-size:14px; color:var(--muted); line-height:1.4; }
+  .wl .ck { width:30px; height:30px; border-radius:9px; border:2px solid var(--line); background:#fff; color:#1f8a4c; font-size:17px; font-weight:800; cursor:pointer; display:grid; place-items:center; padding:0; }
+  .wl .ck.on { background:#1f8a4c; border-color:#1f8a4c; color:#fff; }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
@@ -323,15 +326,57 @@
       pre: W.filter(function (x) { return x[2][0] === '인'; }).map(function (x) { return [x[0], x[1]]; }),
       post: W.filter(function (x) { return x[2][0] !== '인' && x[2][x[2].length - 1] === '인'; }).map(function (x) { return [x[0], x[1]]; })
     };
+    var LEARNED = {};
+    try { LEARNED = JSON.parse(localStorage.getItem('hancha1_learned') || '{}'); } catch (e) { LEARNED = {}; }
+    function saveLearned() {
+      try { localStorage.setItem('hancha1_learned', JSON.stringify(LEARNED)); } catch (e) {}
+    }
+    function speak(word) {
+      if (!('speechSynthesis' in window)) return;
+      var u = new SpeechSynthesisUtterance(word);
+      u.lang = 'ko-KR';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }
     function renderWL(set) {
       var box = document.getElementById('wl');
       box.innerHTML = '';
       WL[set].forEach(function (p) {
         var r = document.createElement('div');
         r.className = 'row';
-        r.innerHTML = '<span class="kr"></span><span class="uz"></span>';
-        r.querySelector('.kr').textContent = p[0];
-        r.querySelector('.uz').textContent = p[1];
+
+        var kr = document.createElement('span');
+        kr.className = 'kr';
+        kr.textContent = p[0];
+
+        var sp = document.createElement('button');
+        sp.type = 'button';
+        sp.className = 'sp';
+        sp.setAttribute('aria-label', 'Talaffuz');
+        sp.textContent = '🔊';
+        sp.addEventListener('click', function () { speak(p[0]); });
+
+        var uz = document.createElement('span');
+        uz.className = 'uz';
+        uz.textContent = p[1];
+
+        var ck = document.createElement('button');
+        ck.type = 'button';
+        ck.className = 'ck' + (LEARNED[p[0]] ? ' on' : '');
+        ck.setAttribute('aria-label', "O'rganildi");
+        ck.textContent = LEARNED[p[0]] ? '✓' : '';
+        ck.addEventListener('click', function () {
+          LEARNED[p[0]] = !LEARNED[p[0]];
+          if (!LEARNED[p[0]]) delete LEARNED[p[0]];
+          saveLearned();
+          ck.classList.toggle('on', !!LEARNED[p[0]]);
+          ck.textContent = LEARNED[p[0]] ? '✓' : '';
+        });
+
+        r.appendChild(kr);
+        r.appendChild(sp);
+        r.appendChild(uz);
+        r.appendChild(ck);
         box.appendChild(r);
       });
       document.querySelectorAll('#seg button').forEach(function (b) {
