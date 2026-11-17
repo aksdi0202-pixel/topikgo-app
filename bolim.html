@@ -157,6 +157,12 @@
   .dtxt { font-size:34px; font-weight:800; line-height:1.3; }
   .dhint { margin-top:10px; font-size:12px; color:var(--muted); }
   .dnav { display:flex; gap:8px; justify-content:center; }
+  .gcard { background:#fff; border-radius:20px; box-shadow:0 4px 14px rgba(31,45,80,.12); padding:18px 14px; height:280px; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; }
+  .gcard .prompt { margin:0; font-size:20px; font-weight:800; color:#142a5a; }
+  .built { display:flex; gap:10px; justify-content:center; margin:14px 0 0; min-height:auto; letter-spacing:0; font-size:22px; font-weight:800; }
+  .slot { width:52px; height:52px; border:2px dashed #96b8e8; border-radius:14px; display:grid; place-items:center; color:#142a5a; }
+  .gtiles { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; width:100%; margin-top:auto; }
+  .gtiles .tile { padding:8px 0; font-size:17px; border-radius:12px; }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
@@ -249,14 +255,16 @@
     </div>
 
     <div class="game" id="game">
-      <div class="prompt" id="prompt"></div>
-      <div class="tiles" id="tiles"></div>
-      <div class="built" id="built"></div>
-      <div class="fb" id="fb"></div>
-      <div class="btns">
-        <button type="button" class="alt" id="undo">⌫ Orqaga</button>
-        <button type="button" id="next">Keyingi</button>
+      <div class="gcard">
+        <div class="prompt" id="prompt"></div>
+        <div class="built" id="built"></div>
+        <div class="tiles gtiles" id="tiles"></div>
       </div>
+      <div class="btns">
+        <button type="button" class="alt" id="undo">← Ortga</button>
+        <button type="button" id="next">Keyingi →</button>
+      </div>
+      <div class="fb" id="fb"></div>
     </div>
 
     <div class="seg" id="seg" style="display:none">
@@ -427,7 +435,14 @@
     function shuffle(a) { return a.slice().sort(function () { return Math.random() - 0.5; }); }
 
     function renderBuilt() {
-      document.getElementById('built').textContent = seqIdx.map(function (i) { return tileBtns[i].textContent; }).join(' ');
+      var box = document.getElementById('built');
+      box.innerHTML = '';
+      for (var k = 0; k < cur[2].length; k++) {
+        var d = document.createElement('div');
+        d.className = 'slot';
+        d.textContent = seqIdx[k] !== undefined ? tileBtns[seqIdx[k]].textContent : '';
+        box.appendChild(d);
+      }
     }
 
     function newRound() {
@@ -452,7 +467,7 @@
         return b;
       });
       document.getElementById('prompt').textContent = cur[1];
-      document.getElementById('built').textContent = '';
+      renderBuilt();
       var fb = document.getElementById('fb');
       fb.textContent = '';
       fb.className = 'fb';
