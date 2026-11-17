@@ -6,7 +6,7 @@
 <title>Bo'lim · Essential Korean Words 2000</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  :root { --bg:#f4f7fb; --text:#1d2433; --muted:#6b7385; --line:#d6dce8; --blue:#2f6fdd; }
+  :root { --bg:#e9f2fc; --text:#1d2433; --muted:#6b7385; --line:#d6dce8; --blue:#2f6fdd; }
   * { box-sizing: border-box; }
   body {
     margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -102,7 +102,7 @@
   .wl .kr { font-size:20px; font-weight:800; white-space:nowrap; }
   .wl .sp { width:36px; height:36px; border-radius:50%; border:0; background:#e8eefc; color:#2f6fdd; font-size:16px; cursor:pointer; display:grid; place-items:center; }
   .wl .uz { font-size:14px; color:var(--muted); line-height:1.4; }
-  .wl .ck { width:30px; height:30px; border-radius:9px; border:2px solid var(--line); background:#fff; color:#1f8a4c; font-size:17px; font-weight:800; cursor:pointer; display:grid; place-items:center; padding:0; }
+  .wl .ck { width:30px; height:30px; border-radius:50%; border:2px solid var(--line); background:#fff; color:#1f8a4c; font-size:17px; font-weight:800; cursor:pointer; display:grid; place-items:center; padding:0; }
   .wl .ck.on { background:#1f8a4c; border-color:#1f8a4c; color:#fff; }
 
   .qopts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
@@ -158,13 +158,6 @@
       <div class="meta">koreyscha: 사람<br>o'zbekcha: odam, inson</div>
     </div>
 
-    <div class="seg" id="seg" style="display:none">
-      <button type="button" class="on" data-set="pre">Oldiga qo'shiladi</button>
-      <button type="button" data-set="post">Orqaga qo'shiladi</button>
-    </div>
-    <div class="wl" id="wl" style="display:none"></div>
-
-
     <div class="game" id="quiz">
       <div class="prompt big" id="qprompt"></div>
       <div class="fb" id="qfb"></div>
@@ -184,6 +177,14 @@
         <button type="button" id="next">Keyingi</button>
       </div>
     </div>
+
+    <div class="seg" id="seg" style="display:none">
+      <button type="button" class="on" data-set="pre">Oldiga qo'shiladi</button>
+      <button type="button" data-set="post">Orqaga qo'shiladi</button>
+    </div>
+    <div class="wl" id="wl" style="display:none"></div>
+
+
   </div>
 
   <script>
@@ -473,7 +474,19 @@
       return wrap;
     }
 
+    function showPractice() {
+      document.getElementById('seg').style.display = 'none';
+      document.getElementById('wl').style.display = 'none';
+      window.scrollTo(0, 0);
+    }
+    function showList() {
+      document.getElementById('quiz').classList.remove('on');
+      document.getElementById('game').classList.remove('on');
+      document.getElementById('seg').style.display = 'flex';
+      document.getElementById('wl').style.display = 'block';
+    }
     function startQuiz(mode) {
+      showPractice();
       document.getElementById('game').classList.remove('on');
       document.getElementById('quiz').classList.add('on');
       QZ.mode = mode;
@@ -561,6 +574,7 @@
 
     var mashqBtn = document.getElementById('mashqBtn');
     var mashqPanel = document.getElementById('mashq');
+    document.querySelector('.tabs > .tab').addEventListener('click', function () { if (LEVEL === 'h' && q === 1) showList(); });
     mashqBtn.addEventListener('click', function () {
       mashqPanel.classList.toggle('open');
     });
@@ -572,6 +586,7 @@
         if (nm) mashqBtn.textContent = nm.textContent + ' ▾';
         mashqPanel.classList.remove('open');
         if (a.dataset.mode === 'build') {
+          showPractice();
           document.getElementById('quiz').classList.remove('on');
           document.getElementById('game').classList.add('on');
           newRound();
