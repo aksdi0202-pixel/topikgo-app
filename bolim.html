@@ -129,21 +129,23 @@
   .dprog { font-weight:800; color:var(--muted); }
   .dtmenu { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; width:100%; }
   .dtmenu.hidden { display:none; }
-  .dstage { perspective:900px; height:360px; margin:8px 0 10px; }
+  .dstage { perspective:900px; height:230px; margin:8px 0 10px; }
   .dflip { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .45s; cursor:pointer; }
   .dflip.back { transform:rotateY(180deg); }
   .dface { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; background:#fff; border-radius:20px; box-shadow:0 4px 14px rgba(31,45,80,.12); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; }
   .dback { transform:rotateY(180deg); background:#fff; }
   .dknow { min-width:52px; font-size:20px; font-weight:800; color:#1f8a4c; border-color:#1f8a4c; }
   .dknow.on { background:#1f8a4c; color:#fff; }
-  .suh-card { position:relative; background:#fff; border-radius:20px; box-shadow:0 4px 14px rgba(31,45,80,.12); padding:52px 20px 20px; min-height:300px; }
+  .suh-card { position:relative; background:#fff; border-radius:20px; box-shadow:0 4px 14px rgba(31,45,80,.12); padding:50px 18px 16px; }
   .suh-hide { position:absolute; top:12px; right:12px; padding:6px 10px; font-size:12px; }
-  .suh-w { font-size:32px; font-weight:800; color:#142a5a; }
-  .suh-uz { font-size:18px; font-weight:700; margin-top:4px; }
-  .suh-syl { font-size:15px; font-weight:700; color:#2f6fdd; line-height:1.6; margin-top:8px; }
-  .suh-sent { font-size:17px; margin-top:16px; line-height:1.5; }
-  .suh-tr { font-size:14px; color:var(--muted); margin-top:6px; line-height:1.5; }
-  .suh-tr.hide { display:none; }
+  .suh-line { display:flex; align-items:baseline; flex-wrap:wrap; gap:8px; }
+  .suh-w { font-size:30px; font-weight:800; color:#142a5a; }
+  .suh-syl { display:flex; flex-wrap:wrap; gap:16px; margin-top:10px; font-size:17px; font-weight:700; }
+  .suh-syl .sk { color:#142a5a; }
+  .suh-syl .uzb { color:#2f6fdd; }
+  .suh-sent { font-size:17px; margin-top:14px; line-height:1.5; }
+  .suh-tr { font-size:14px; color:var(--muted); margin-top:4px; line-height:1.5; }
+  .suh-card.hideuz .uzb { display:none; }
   .dk-w { font-size:30px; font-weight:800; color:#142a5a; margin-bottom:4px; }
   .dk-syl { font-size:17px; font-weight:700; color:#2f6fdd; line-height:1.5; }
   .dk-uz { font-size:20px; font-weight:800; color:#142a5a; margin-top:4px; }
@@ -223,13 +225,12 @@
     </div>
 
     <div class="dk" id="suh">
-      <div class="suh-card">
+      <div class="suh-card" id="suhCard">
         <button type="button" class="dbtn alt suh-hide" id="suhHide">Tarjimani yashirish</button>
-        <div class="suh-w" id="suhW"></div>
-        <div class="suh-uz" id="suhUz"></div>
+        <div class="suh-line"><span class="suh-w" id="suhW"></span><span class="uzb" id="suhUz"></span></div>
         <div class="suh-syl" id="suhSyl"></div>
         <div class="suh-sent" id="suhSent"></div>
-        <div class="suh-tr" id="suhTr"></div>
+        <div class="suh-tr uzb" id="suhTr"></div>
       </div>
       <div class="dnav" style="margin-top:12px">
         <button type="button" class="dbtn" id="suhPrev">Ortga</button>
@@ -489,15 +490,17 @@
       var box = document.getElementById('suhSyl');
       box.innerHTML = '';
       it[2].forEach(function (c, j) {
-        var d = document.createElement('div');
-        d.textContent = c + ' — ' + it[3][j];
+        var d = document.createElement('span');
+        var k = document.createElement('span'); k.className = 'sk'; k.textContent = c;
+        var u = document.createElement('span'); u.className = 'uzb'; u.textContent = '— ' + it[3][j];
+        d.appendChild(k); d.appendChild(document.createTextNode(' ')); d.appendChild(u);
         box.appendChild(d);
       });
       document.getElementById('suhSent').textContent = it[4][0];
       document.getElementById('suhTr').textContent = it[4][1];
-      document.getElementById('suhTr').classList.toggle('hide', SUH.hidden);
+      var card = document.getElementById('suhCard');
+      card.classList.toggle('hideuz', SUH.hidden);
       document.getElementById('suhHide').textContent = SUH.hidden ? "Tarjimani ko'rsatish" : 'Tarjimani yashirish';
-      document.getElementById('suhProg').textContent = (SUH.idx + 1) + ' / ' + W.length;
     }
     function startSuh() {
       showPractice();
