@@ -97,6 +97,14 @@
   .wl .uz { font-size:14px; color:var(--muted); line-height:1.4; }
   .wl .ck { width:30px; height:30px; border-radius:9px; border:2px solid var(--line); background:#fff; color:#1f8a4c; font-size:17px; font-weight:800; cursor:pointer; display:grid; place-items:center; padding:0; }
   .wl .ck.on { background:#1f8a4c; border-color:#1f8a4c; color:#fff; }
+
+  .qopts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+  .qopts button { padding:14px 8px; border-radius:14px; border:2px solid var(--line); background:#f4f7fb; font-family:inherit; font-size:16px; font-weight:700; color:var(--text); cursor:pointer; }
+  .qopts button.alt { background:#e8ecf4; }
+  .qopts button.right { background:#1f8a4c; border-color:#1f8a4c; color:#fff; }
+  .qopts button.wrong { background:#fbe3e0; border-color:#c0392b; }
+  .qopts button:disabled { cursor:default; }
+  .prompt.big { font-size:40px; font-weight:800; margin:10px 0 4px; }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
@@ -140,6 +148,16 @@
       <button type="button" data-set="post">Orqaga qo'shiladi</button>
     </div>
     <div class="wl" id="wl" style="display:none"></div>
+
+
+    <div class="game" id="quiz">
+      <div class="prompt big" id="qprompt"></div>
+      <div class="fb" id="qfb"></div>
+      <div class="qopts" id="qopts"></div>
+      <div class="btns">
+        <button type="button" id="qnext">Keyingi</button>
+      </div>
+    </div>
 
     <div class="game" id="game">
       <div class="prompt" id="prompt"></div>
@@ -387,6 +405,87 @@
       b.addEventListener('click', function () { renderWL(b.dataset.set); });
     });
 
+
+    // ---- 1-dars mashqlari: kartochka va testlar (faqat 2000 hancha, 1-dars) ----
+    var QZ = { mode: null, it: null };
+    function shuffleQ(a) { return a.slice().sort(function () { return Math.random() - 0.5; }); }
+    function bdText(it) { return it[2].map(function (c, i) { return c + ' — ' + it[3][i]; }).join(' · '); }
+    function qFb(cls, html) { var f = document.getElementById('qfb'); f.className = 'fb ' + (cls || ''); f.innerHTML = html || ''; }
+    function qOpts() { return document.getElementById('qopts'); }
+    function mkBtn(text, cls, fn) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = text; if (cls) b.className = cls;
+      b.addEventListener('click', fn);
+      qOpts().appendChild(b);
+      return b;
+    }
+    function learnQ(it) { LEARNED[it[0]] = true; saveLearned(); }
+    function speakQ(it) { speak(it[0]); }
+
+    function startQuiz(mode) {
+      document.getElementById('game').classList.remove('on');
+      document.getElementById('quiz').classList.add('on');
+      QZ.mode = mode;
+      nextQ();
+    }
+
+    function nextQ() {
+      var it = W[Math.floor(Math.random() * W.length)];
+      QZ.it = it;
+      var p = document.getElementById('qprompt');
+      p.onclick = null;
+      qOpts().innerHTML = '';
+      qFb('', '');
+
+      if (QZ.mode === 'kk') {
+        p.textContent = it[0];
+        mkBtn('Ochish', '', function () {
+          p.textContent = it[0] + ' — ' + it[1];
+          qOpts().innerHTML = '';
+          qFb('', bdText(it));
+          mkBtn("Bilmadim", 'alt', nextQ);
+          mkBtn('Bildim', '', function () { learnQ(it); nextQ(); });
+        });
+      } else if (QZ.mode === 'ku') {
+        p.textContent = it[1];
+        mkBtn('Ochish', '', function () {
+          p.textContent = it[0] + ' — ' + it[1];
+          qOpts().innerHTML = '';
+          qFb('', bdText(it));
+          mkBtn("Bilmadim", 'alt', nextQ);
+          mkBtn('Bildim', '', function () { learnQ(it); nextQ(); });
+        });
+      } else {
+        // Testlar: 'tu' (kor → uz), 'tk' (uz → kor), 'es' (eshitish → uz)
+        var prompt, correct, pool;
+        if (QZ.mode === 'tu') { prompt = it[0]; correct = it[1]; pool = W.map(function (x) { return x[1]; }); }
+        else if (QZ.mode === 'tk') { prompt = it[1]; correct = it[0]; pool = W.map(function (x) { return x[0]; }); }
+        else { prompt = '🔊'; correct = it[1]; pool = W.map(function (x) { return x[1]; }); }
+        p.textContent = prompt;
+        if (QZ.mode === 'es') { p.onclick = function () { speakQ(it); }; setTimeout(function () { speakQ(it); }, 150); }
+        var wrong = shuffleQ(pool.filter(function (x) { return x !== correct; })).slice(0, 3);
+        var opts = shuffleQ([correct].concat(wrong));
+        opts.forEach(function (o) {
+          var b = mkBtn(o, '', function () {
+            if (b.parentNode.dataset.done) return;
+            qOpts().dataset.done = '1';
+            qOpts().querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+            if (o === correct) {
+              b.classList.add('right');
+              learnQ(it);
+              qFb('ok', '✔ ' + it[0] + ' — ' + bdText(it));
+            } else {
+              b.classList.add('wrong');
+              qOpts().querySelectorAll('button').forEach(function (x) { if (x.textContent === correct) x.classList.add('right'); });
+              qFb('no', "To'g'ri javob: " + correct + ' (' + it[0] + ')');
+            }
+          });
+        });
+        delete qOpts().dataset.done;
+      }
+    }
+    document.getElementById('qnext').addEventListener('click', nextQ);
+
     if (LEVEL === 'h') {
       // Hanja bo'limida "Yozish" o'rniga "So'z yasash"
       var yz = document.querySelector('#mashq a:last-child');
@@ -395,6 +494,9 @@
       yz.querySelector('.nm').textContent = "So'z yasash";
       yz.querySelector('.kr').textContent = '단어 만들기';
       if (q === 1) {
+        var mitems = document.querySelectorAll('#mashq a');
+        var modes = ['kk', 'ku', 'tu', 'tk', 'es'];
+        for (var mi = 0; mi < modes.length; mi++) mitems[mi].dataset.mode = modes[mi];
         document.getElementById('anchor').style.display = 'block';
         document.getElementById('seg').style.display = 'flex';
         document.getElementById('wl').style.display = 'block';
@@ -415,8 +517,11 @@
         if (nm) mashqBtn.textContent = nm.textContent + ' ▾';
         mashqPanel.classList.remove('open');
         if (a.dataset.mode === 'build') {
+          document.getElementById('quiz').classList.remove('on');
           document.getElementById('game').classList.add('on');
           newRound();
+        } else if (a.dataset.mode && a.dataset.mode !== 'build') {
+          startQuiz(a.dataset.mode);
         }
       });
     });
