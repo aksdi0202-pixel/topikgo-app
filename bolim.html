@@ -90,7 +90,14 @@
   .seg button { flex:1; padding:10px 6px; border:0; border-radius:12px; background:transparent; font-family:inherit; font-size:15px; font-weight:700; color:var(--muted); cursor:pointer; }
   .seg button.on { background:#fff; color:var(--text); box-shadow:0 2px 6px rgba(0,0,0,.08); }
   .wl { background:#fff; border:2px solid var(--line); border-radius:20px; padding:6px 14px; margin-bottom:12px; }
-  .wl .row { display:grid; grid-template-columns:86px 40px 1fr 34px; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid #eef1f7; }
+  .wl .row { display:grid; grid-template-columns:86px 40px 1fr 34px; align-items:center; gap:10px; padding:16px 0; border-bottom:1px solid #eef1f7; opacity:0; transform:translateY(-10px); }
+  .wl.open .row { animation: wlDrop .32s ease forwards; animation-delay: var(--d, 0ms); }
+  .wl.closing .row { animation: wlUp .18s ease forwards; animation-delay: var(--d, 0ms); }
+  @keyframes wlDrop { to { opacity:1; transform:translateY(0); } }
+  @keyframes wlUp { to { opacity:0; transform:translateY(-8px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .wl .row, .wl.open .row, .wl.closing .row { animation:none; opacity:1; transform:none; }
+  }
   .wl .row:last-child { border-bottom:0; }
   .wl .kr { font-size:20px; font-weight:800; white-space:nowrap; }
   .wl .sp { width:36px; height:36px; border-radius:50%; border:0; background:#e8eefc; color:#2f6fdd; font-size:16px; cursor:pointer; display:grid; place-items:center; }
@@ -356,10 +363,31 @@
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
     }
+    var WL_BUSY = false;
     function renderWL(set) {
       var box = document.getElementById('wl');
+      document.querySelectorAll('#seg button').forEach(function (b) {
+        b.classList.toggle('on', b.dataset.set === set);
+      });
+      if (WL_BUSY) return;
+      var hadRows = box.children.length > 0;
+      if (hadRows) {
+        WL_BUSY = true;
+        box.classList.remove('open');
+        box.classList.add('closing');
+        setTimeout(function () {
+          box.classList.remove('closing');
+          WL_BUSY = false;
+          drawWL(set);
+        }, 200);
+      } else {
+        drawWL(set);
+      }
+    }
+    function drawWL(set) {
+      var box = document.getElementById('wl');
       box.innerHTML = '';
-      WL[set].forEach(function (p) {
+      WL[set].forEach(function (p, idx) {
         var r = document.createElement('div');
         r.className = 'row';
 
@@ -395,11 +423,10 @@
         r.appendChild(sp);
         r.appendChild(uz);
         r.appendChild(ck);
+        r.style.setProperty('--d', Math.min(idx * 45, 900) + 'ms');
         box.appendChild(r);
       });
-      document.querySelectorAll('#seg button').forEach(function (b) {
-        b.classList.toggle('on', b.dataset.set === set);
-      });
+      box.classList.add('open');
     }
     document.querySelectorAll('#seg button').forEach(function (b) {
       b.addEventListener('click', function () { renderWL(b.dataset.set); });
