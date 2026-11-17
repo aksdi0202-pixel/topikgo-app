@@ -89,8 +89,8 @@
   .seg { display:flex; gap:6px; padding:5px; border-radius:16px; background:#e8ecf4; margin-bottom:10px; }
   .seg button { flex:1; padding:10px 6px; border:0; border-radius:12px; background:transparent; font-family:inherit; font-size:15px; font-weight:700; color:var(--muted); cursor:pointer; }
   .seg button.on { background:#fff; color:var(--text); box-shadow:0 2px 6px rgba(0,0,0,.08); }
-  .wl { background:#fff; border:2px solid var(--line); border-radius:20px; padding:6px 14px; margin-bottom:12px; }
-  .wl .row { display:grid; grid-template-columns:86px 40px 1fr 34px; align-items:center; gap:10px; padding:16px 0; border-bottom:1px solid #eef1f7; opacity:0; transform:translateY(-10px); }
+  .wl { margin-bottom:12px; }
+  .wl .row { display:grid; grid-template-columns:86px 40px 1fr 34px; align-items:center; gap:10px; padding:14px 14px; margin-bottom:12px; background:#fff; border:2px solid var(--line); border-radius:18px; box-shadow:0 3px 10px rgba(31,45,80,.08); opacity:0; transform:translateY(-10px); }
   .wl.open .row { animation: wlDrop .32s ease forwards; animation-delay: var(--d, 0ms); }
   .wl.closing .row { animation: wlUp .18s ease forwards; animation-delay: var(--d, 0ms); }
   @keyframes wlDrop { to { opacity:1; transform:translateY(0); } }
@@ -98,11 +98,9 @@
   @media (prefers-reduced-motion: reduce) {
     .wl .row, .wl.open .row, .wl.closing .row { animation:none; opacity:1; transform:none; }
   }
-  .wl .row:last-child { border-bottom:0; }
   .wl .kr { font-size:20px; font-weight:800; white-space:nowrap; }
   .wl .sp { width:36px; height:36px; border-radius:50%; border:0; background:#e8eefc; color:#2f6fdd; font-size:16px; cursor:pointer; display:grid; place-items:center; }
   .wl .uz { font-size:14px; color:var(--muted); line-height:1.4; }
-  .wl .ck { width:30px; height:30px; border-radius:50%; border:2px solid var(--line); background:#fff; color:#1f8a4c; font-size:17px; font-weight:800; cursor:pointer; display:grid; place-items:center; padding:0; }
   .wl .ck.on { background:#1f8a4c; border-color:#1f8a4c; color:#fff; }
 
   .qopts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
@@ -120,6 +118,26 @@
   .syl-f, .syl-b { position:absolute; inset:0; border-radius:16px; display:grid; place-items:center; backface-visibility:hidden; -webkit-backface-visibility:hidden; border:2px solid var(--line); text-align:center; padding:6px; box-sizing:border-box; }
   .syl-f { background:#fff; font-size:30px; font-weight:800; color:var(--text); }
   .syl-b { transform:rotateY(180deg); background:#eaf3ff; font-size:16px; font-weight:700; color:#2f6fdd; }
+
+  .dk { display:none; }
+  .dk.on { display:block; }
+  .dbar { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:10px; align-items:center; }
+  .dbtn { padding:9px 12px; border-radius:14px; border:1.5px solid #96ebff; background:#fff; font-family:inherit; font-weight:700; font-size:14px; color:#142a5a; cursor:pointer; box-shadow:0 3px 0 #c9dcf5; }
+  .dbtn.on { background:#2f6fdd; color:#fff; border-color:#2f6fdd; box-shadow:none; }
+  .dbtn.pill { border-radius:20px; }
+  .dbtn.alt { background:#e8ecf4; color:var(--text); box-shadow:none; border-color:transparent; }
+  .dprog { font-weight:800; color:var(--muted); }
+  .dtmenu { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; width:100%; }
+  .dtmenu.hidden { display:none; }
+  .dstage { perspective:900px; height:240px; margin:8px 0 10px; }
+  .dflip { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .45s; cursor:pointer; }
+  .dflip.back { transform:rotateY(180deg); }
+  .dface { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; background:#fff; border-radius:20px; box-shadow:0 4px 14px rgba(31,45,80,.12); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; }
+  .dback { transform:rotateY(180deg); background:#eaf3ff; }
+  .dtxt { font-size:34px; font-weight:800; line-height:1.3; }
+  .dback .dtxt { font-size:24px; color:#142a5a; }
+  .dhint { margin-top:10px; font-size:12px; color:var(--muted); }
+  .dnav { display:flex; gap:8px; justify-content:center; }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
@@ -156,6 +174,40 @@
     <div class="anchor" id="anchor" style="display:none">
       <div class="ch">인</div>
       <div class="meta">koreyscha: 사람<br>o'zbekcha: odam, inson</div>
+    </div>
+
+
+    <div class="dk" id="deck">
+      <div class="dbar">
+        <button type="button" class="dbtn on" data-dir="ku">Koreys → O'zbek</button>
+        <button type="button" class="dbtn" data-dir="uk">O'zbek → Koreys</button>
+        <button type="button" class="dbtn" data-dir="mix">Aralash</button>
+      </div>
+      <div class="dbar"><span class="dprog" id="dprog"></span></div>
+      <div class="dbar">
+        <button type="button" class="dbtn pill" id="dtimer">⏱ Timer</button>
+        <button type="button" class="dbtn pill" id="dshuffle">↻ Aralashtirish</button>
+      </div>
+      <div class="dbar dtmenu hidden" id="dtmenu">
+        <button type="button" class="dbtn" data-sec="0">O'chiq</button>
+        <button type="button" class="dbtn" data-sec="3">3 s</button>
+        <button type="button" class="dbtn" data-sec="5">5 s</button>
+        <button type="button" class="dbtn" data-sec="7">7 s</button>
+        <button type="button" class="dbtn" data-sec="10">10 s</button>
+      </div>
+      <div class="dstage">
+        <div class="dflip" id="dcard">
+          <div class="dface"><div class="dtxt" id="dfront"></div><span class="dhint">bosing — javob</span></div>
+          <div class="dface dback"><div class="dtxt" id="dback"></div></div>
+        </div>
+      </div>
+      <div class="dnav">
+        <button type="button" class="dbtn" id="dprev">← Oldingi</button>
+        <button type="button" class="dbtn" id="dnext">Keyingi →</button>
+      </div>
+      <div style="margin-top:12px; text-align:center;">
+        <button type="button" class="dbtn alt" id="dlist">← Ro'yxat</button>
+      </div>
     </div>
 
     <div class="game" id="quiz">
@@ -475,16 +527,107 @@
     }
 
     function showPractice() {
+      clearDeckTimers();
+      document.getElementById('anchor').style.display = 'none';
       document.getElementById('seg').style.display = 'none';
       document.getElementById('wl').style.display = 'none';
+      document.getElementById('deck').classList.remove('on');
+      document.getElementById('quiz').classList.remove('on');
+      document.getElementById('game').classList.remove('on');
       window.scrollTo(0, 0);
     }
     function showList() {
+      clearDeckTimers();
+      document.getElementById('deck').classList.remove('on');
       document.getElementById('quiz').classList.remove('on');
       document.getElementById('game').classList.remove('on');
+      document.getElementById('anchor').style.display = 'block';
       document.getElementById('seg').style.display = 'flex';
       document.getElementById('wl').style.display = 'block';
     }
+
+    // ---- Kartochka (deck): 40 ta so'z, oldinga/orqaga, aralash, timer ----
+    var DK = { dir: 'ku', list: [], idx: 0, flipped: false, sec: 0, timers: [], side: [] };
+    function clearDeckTimers() { DK.timers.forEach(clearTimeout); DK.timers = []; }
+    function dkSideFor(i) { return DK.dir === 'mix' ? DK.side[i] : DK.dir; }
+    function dkRender() {
+      var it = W[DK.list[DK.idx]];
+      var s2 = dkSideFor(DK.list[DK.idx]);
+      document.getElementById('dfront').textContent = s2 === 'ku' ? it[0] : it[1];
+      document.getElementById('dback').textContent = s2 === 'ku' ? it[1] : it[0];
+      document.getElementById('dcard').classList.toggle('back', DK.flipped);
+      document.getElementById('dprog').textContent = (DK.idx + 1) + ' / ' + DK.list.length;
+    }
+    function dkSetCardBack(b) { DK.flipped = b; document.getElementById('dcard').classList.toggle('back', b); }
+    function dkGo(d, manual) {
+      DK.idx = (DK.idx + d + DK.list.length) % DK.list.length;
+      DK.flipped = false;
+      dkRender();
+      if (manual !== false && DK.sec) dkAuto();
+    }
+    function dkAuto() {
+      clearDeckTimers();
+      if (!DK.sec) return;
+      var t = DK.sec * 1000;
+      DK.timers.push(setTimeout(function () {
+        dkSetCardBack(true);
+        DK.timers.push(setTimeout(function () {
+          dkSetCardBack(false);
+          DK.timers.push(setTimeout(function () { dkGo(1, false); dkAuto(); }, 500));
+        }, t));
+      }, t));
+    }
+    function dkUpdTimer() {
+      var b = document.getElementById('dtimer');
+      b.textContent = DK.sec ? '⏱ ' + DK.sec + ' s' : '⏱ Timer';
+      b.classList.toggle('on', !!DK.sec);
+    }
+    function dkSetDir(d) {
+      DK.dir = d;
+      if (d === 'mix') DK.side = W.map(function () { return Math.random() < 0.5 ? 'ku' : 'uk'; });
+      document.querySelectorAll('#deck [data-dir]').forEach(function (b) { b.classList.toggle('on', b.dataset.dir === d); });
+      DK.idx = 0; DK.flipped = false; dkRender();
+    }
+    function startDeck(dir) {
+      showPractice();
+      document.getElementById('deck').classList.add('on');
+      DK.list = W.map(function (_, i) { return i; });
+      DK.idx = 0; DK.flipped = false;
+      dkSetDir(dir);
+    }
+    document.getElementById('dcard').addEventListener('click', function () {
+      DK.flipped = !DK.flipped;
+      document.getElementById('dcard').classList.toggle('back', DK.flipped);
+    });
+    document.getElementById('dnext').addEventListener('click', function () { dkGo(1); });
+    document.getElementById('dprev').addEventListener('click', function () { dkGo(-1); });
+    document.getElementById('dlist').addEventListener('click', showList);
+    document.querySelectorAll('#deck [data-dir]').forEach(function (b) {
+      b.addEventListener('click', function () { dkSetDir(b.dataset.dir); });
+    });
+    document.getElementById('dshuffle').addEventListener('click', function () {
+      for (var i = DK.list.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = DK.list[i]; DK.list[i] = DK.list[j]; DK.list[j] = t;
+      }
+      DK.idx = 0; DK.flipped = false; dkRender();
+      if (DK.sec) dkAuto();
+    });
+    document.getElementById('dtimer').addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.getElementById('dtmenu').classList.toggle('hidden');
+    });
+    document.querySelectorAll('#dtmenu button').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        DK.sec = +b.dataset.sec;
+        document.getElementById('dtmenu').classList.add('hidden');
+        dkUpdTimer();
+        if (DK.sec) dkAuto(); else clearDeckTimers();
+      });
+    });
+    document.addEventListener('click', function () { document.getElementById('dtmenu').classList.add('hidden'); });
+
     function startQuiz(mode) {
       showPractice();
       document.getElementById('game').classList.remove('on');
@@ -590,7 +733,11 @@
           document.getElementById('quiz').classList.remove('on');
           document.getElementById('game').classList.add('on');
           newRound();
-        } else if (a.dataset.mode && a.dataset.mode !== 'build') {
+        } else if (a.dataset.mode === 'kk') {
+          startDeck('ku');
+        } else if (a.dataset.mode === 'ku') {
+          startDeck('uk');
+        } else if (a.dataset.mode) {
           startQuiz(a.dataset.mode);
         }
       });
