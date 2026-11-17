@@ -133,13 +133,23 @@
   .dflip { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .45s; cursor:pointer; }
   .dflip.back { transform:rotateY(180deg); }
   .dface { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; background:#fff; border-radius:20px; box-shadow:0 4px 14px rgba(31,45,80,.12); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; }
-  .dback { transform:rotateY(180deg); background:#eaf3ff; justify-content:flex-start; overflow:auto; }
+  .dback { transform:rotateY(180deg); background:#fff; }
+  .dknow { min-width:52px; font-size:20px; font-weight:800; color:#1f8a4c; border-color:#1f8a4c; }
+  .dknow.on { background:#1f8a4c; color:#fff; }
+  .suh-card { position:relative; background:#fff; border-radius:20px; box-shadow:0 4px 14px rgba(31,45,80,.12); padding:52px 20px 20px; min-height:300px; }
+  .suh-hide { position:absolute; top:12px; right:12px; padding:6px 10px; font-size:12px; }
+  .suh-w { font-size:32px; font-weight:800; color:#142a5a; }
+  .suh-uz { font-size:18px; font-weight:700; margin-top:4px; }
+  .suh-syl { font-size:15px; font-weight:700; color:#2f6fdd; line-height:1.6; margin-top:8px; }
+  .suh-sent { font-size:17px; margin-top:16px; line-height:1.5; }
+  .suh-tr { font-size:14px; color:var(--muted); margin-top:6px; line-height:1.5; }
+  .suh-tr.hide { display:none; }
   .dk-w { font-size:30px; font-weight:800; color:#142a5a; margin-bottom:4px; }
   .dk-syl { font-size:17px; font-weight:700; color:#2f6fdd; line-height:1.5; }
   .dk-uz { font-size:20px; font-weight:800; color:#142a5a; margin-top:4px; }
   .dk-sent { font-size:16px; margin-top:12px; color:var(--text); line-height:1.5; }
   .dk-tr { font-size:14px; color:var(--muted); margin-top:4px; line-height:1.5; }
-  .dk-tr.hide { display:none; }
+
   .dk-tb { margin-top:10px; }
   .dtxt { font-size:34px; font-weight:800; line-height:1.3; }
   .dhint { margin-top:10px; font-size:12px; color:var(--muted); }
@@ -184,11 +194,6 @@
 
 
     <div class="dk" id="deck">
-      <div class="dbar">
-        <button type="button" class="dbtn on" data-dir="ku">Koreys → O'zbek</button>
-        <button type="button" class="dbtn" data-dir="uk">O'zbek → Koreys</button>
-        <button type="button" class="dbtn" data-dir="mix">Aralash</button>
-      </div>
       <div class="dbar"><span class="dprog" id="dprog"></span></div>
       <div class="dbar">
         <button type="button" class="dbtn pill" id="dtimer">⏱ Timer</button>
@@ -209,10 +214,30 @@
       </div>
       <div class="dnav">
         <button type="button" class="dbtn" id="dprev">← Oldingi</button>
+        <button type="button" class="dbtn dknow" id="dknow" aria-label="Yodlangan">✓</button>
         <button type="button" class="dbtn" id="dnext">Keyingi →</button>
       </div>
       <div style="margin-top:12px; text-align:center;">
         <button type="button" class="dbtn alt" id="dlist">← Ro'yxat</button>
+      </div>
+    </div>
+
+    <div class="dk" id="suh">
+      <div class="suh-card">
+        <button type="button" class="dbtn alt suh-hide" id="suhHide">Tarjimani yashirish</button>
+        <div class="suh-w" id="suhW"></div>
+        <div class="suh-uz" id="suhUz"></div>
+        <div class="suh-syl" id="suhSyl"></div>
+        <div class="suh-sent" id="suhSent"></div>
+        <div class="suh-tr" id="suhTr"></div>
+      </div>
+      <div class="dbar"><span class="dprog" id="suhProg"></span></div>
+      <div class="dnav">
+        <button type="button" class="dbtn" id="suhPrev">← Oldingi</button>
+        <button type="button" class="dbtn" id="suhNext">Keyingi →</button>
+      </div>
+      <div style="margin-top:12px; text-align:center;">
+        <button type="button" class="dbtn alt" id="suhList">← Ro'yxat</button>
       </div>
     </div>
 
@@ -458,6 +483,37 @@
     });
     document.getElementById('next').addEventListener('click', newRound);
 
+
+    // ---- Suhbat: misol gaplar, aylanmaydigan kartochka ----
+    var SUH = { idx: 0, hidden: false };
+    function suhRender() {
+      var it = W[SUH.idx];
+      document.getElementById('suhW').textContent = it[0];
+      document.getElementById('suhUz').textContent = it[1];
+      var box = document.getElementById('suhSyl');
+      box.innerHTML = '';
+      it[2].forEach(function (c, j) {
+        var d = document.createElement('div');
+        d.textContent = c + ' — ' + it[3][j];
+        box.appendChild(d);
+      });
+      document.getElementById('suhSent').textContent = it[4][0];
+      document.getElementById('suhTr').textContent = it[4][1];
+      document.getElementById('suhTr').classList.toggle('hide', SUH.hidden);
+      document.getElementById('suhHide').textContent = SUH.hidden ? "Tarjimani ko'rsatish" : 'Tarjimani yashirish';
+      document.getElementById('suhProg').textContent = (SUH.idx + 1) + ' / ' + W.length;
+    }
+    function startSuh() {
+      showPractice();
+      document.getElementById('suh').classList.add('on');
+      SUH.idx = 0;
+      suhRender();
+    }
+    document.getElementById('suhPrev').addEventListener('click', function () { SUH.idx = (SUH.idx - 1 + W.length) % W.length; suhRender(); });
+    document.getElementById('suhNext').addEventListener('click', function () { SUH.idx = (SUH.idx + 1) % W.length; suhRender(); });
+    document.getElementById('suhHide').addEventListener('click', function () { SUH.hidden = !SUH.hidden; suhRender(); });
+    document.getElementById('suhList').addEventListener('click', showList);
+
     // Ro'yxat: oldiga va orqaga qo'shiluvchilar
     var WL = {
       pre: W.filter(function (x) { return x[2][0] === '인'; }).map(function (x) { return [x[0], x[1]]; }),
@@ -475,13 +531,13 @@
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
     }
-    var WL_BUSY = false;
+    var WL_BUSY = false, WL_PENDING = null;
     function renderWL(set) {
       var box = document.getElementById('wl');
       document.querySelectorAll('#seg button').forEach(function (b) {
         b.classList.toggle('on', b.dataset.set === set);
       });
-      if (WL_BUSY) return;
+      if (WL_BUSY) { WL_PENDING = set; return; }
       var hadRows = box.children.length > 0;
       if (hadRows) {
         WL_BUSY = true;
@@ -490,7 +546,9 @@
         setTimeout(function () {
           box.classList.remove('closing');
           WL_BUSY = false;
-          drawWL(set);
+          var next = WL_PENDING || set;
+          WL_PENDING = null;
+          drawWL(next);
         }, 200);
       } else {
         drawWL(set);
@@ -583,6 +641,7 @@
       document.getElementById('seg').style.display = 'none';
       document.getElementById('wl').style.display = 'none';
       document.getElementById('deck').classList.remove('on');
+      document.getElementById('suh').classList.remove('on');
       document.getElementById('quiz').classList.remove('on');
       document.getElementById('game').classList.remove('on');
       window.scrollTo(0, 0);
@@ -590,6 +649,7 @@
     function showList() {
       clearDeckTimers();
       document.getElementById('deck').classList.remove('on');
+      document.getElementById('suh').classList.remove('on');
       document.getElementById('quiz').classList.remove('on');
       document.getElementById('game').classList.remove('on');
       document.getElementById('anchor').style.display = 'block';
@@ -598,39 +658,18 @@
     }
 
     // ---- Kartochka (deck): 40 ta so'z, oldinga/orqaga, aralash, timer ----
-    var DK = { dir: 'ku', list: [], idx: 0, flipped: false, sec: 0, timers: [], side: [] };
+    var DK = { dir: 'ku', list: [], idx: 0, flipped: false, sec: 0, timers: [] };
     function clearDeckTimers() { DK.timers.forEach(clearTimeout); DK.timers = []; }
-    function dkSideFor(i) { return DK.dir === 'mix' ? DK.side[i] : DK.dir; }
     function dkRender() {
       var i = DK.list[DK.idx];
       var it = W[i];
-      var s2 = dkSideFor(i);
-      document.getElementById('dfront').textContent = s2 === 'ku' ? it[0] : it[1];
-      var back = document.getElementById('dback');
-      back.innerHTML = '';
-      if (s2 === 'uk') {
-        var kw = document.createElement('div'); kw.className = 'dk-w'; kw.textContent = it[0]; back.appendChild(kw);
-      }
-      it[2].forEach(function (c, j) {
-        var sy = document.createElement('div'); sy.className = 'dk-syl';
-        sy.textContent = c + ' — ' + it[3][j];
-        back.appendChild(sy);
-      });
-      if (s2 === 'ku') {
-        var uz = document.createElement('div'); uz.className = 'dk-uz'; uz.textContent = it[1]; back.appendChild(uz);
-      }
-      var se = document.createElement('div'); se.className = 'dk-sent'; se.textContent = it[4][0]; back.appendChild(se);
-      var tr = document.createElement('div'); tr.className = 'dk-tr'; tr.textContent = it[4][1]; back.appendChild(tr);
-      var tb = document.createElement('button');
-      tb.type = 'button'; tb.className = 'dbtn alt dk-tb'; tb.textContent = 'Tarjimani yashirish';
-      tb.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var hid = tr.classList.toggle('hide');
-        tb.textContent = hid ? "Tarjimani ko'rsatish" : 'Tarjimani yashirish';
-      });
-      back.appendChild(tb);
+      var ku = DK.dir === 'ku';
+      document.getElementById('dfront').textContent = ku ? it[0] : it[1];
+      document.getElementById('dback').textContent = ku ? it[1] : it[0];
       document.getElementById('dcard').classList.toggle('back', DK.flipped);
       document.getElementById('dprog').textContent = (DK.idx + 1) + ' / ' + DK.list.length;
+      var kb = document.getElementById('dknow');
+      kb.classList.toggle('on', !!LEARNED[it[0]]);
     }
     function dkSetCardBack(b) { DK.flipped = b; document.getElementById('dcard').classList.toggle('back', b); }
     function dkGo(d, manual) {
@@ -656,18 +695,13 @@
       b.textContent = DK.sec ? '⏱ ' + DK.sec + ' s' : '⏱ Timer';
       b.classList.toggle('on', !!DK.sec);
     }
-    function dkSetDir(d) {
-      DK.dir = d;
-      if (d === 'mix') DK.side = W.map(function () { return Math.random() < 0.5 ? 'ku' : 'uk'; });
-      document.querySelectorAll('#deck [data-dir]').forEach(function (b) { b.classList.toggle('on', b.dataset.dir === d); });
-      DK.idx = 0; DK.flipped = false; dkRender();
-    }
     function startDeck(dir) {
       showPractice();
       document.getElementById('deck').classList.add('on');
+      DK.dir = dir;
       DK.list = W.map(function (_, i) { return i; });
       DK.idx = 0; DK.flipped = false;
-      dkSetDir(dir);
+      dkRender();
     }
     document.getElementById('dcard').addEventListener('click', function () {
       DK.flipped = !DK.flipped;
@@ -676,8 +710,12 @@
     document.getElementById('dnext').addEventListener('click', function () { dkGo(1); });
     document.getElementById('dprev').addEventListener('click', function () { dkGo(-1); });
     document.getElementById('dlist').addEventListener('click', showList);
-    document.querySelectorAll('#deck [data-dir]').forEach(function (b) {
-      b.addEventListener('click', function () { dkSetDir(b.dataset.dir); });
+    document.getElementById('dknow').addEventListener('click', function (e) {
+      e.stopPropagation();
+      var it = W[DK.list[DK.idx]];
+      if (LEARNED[it[0]]) { delete LEARNED[it[0]]; } else { LEARNED[it[0]] = true; }
+      saveLearned();
+      document.getElementById('dknow').classList.toggle('on', !!LEARNED[it[0]]);
     });
     document.getElementById('dshuffle').addEventListener('click', function () {
       for (var i = DK.list.length - 1; i > 0; i--) {
@@ -780,11 +818,7 @@
       yz.querySelector('.kr').textContent = '단어 만들기';
       if (q === 1) {
         var mitems = document.querySelectorAll('#mashq a');
-        mitems[1].remove();
-        mitems = document.querySelectorAll('#mashq a');
-        mitems[0].querySelector('.nm').textContent = 'Kartochka';
-        mitems[0].querySelector('.kr').textContent = '카드';
-        var modes = ['kk', 'tu', 'tk', 'es'];
+        var modes = ['kk', 'ku', 'tu', 'tk', 'es'];
         for (var mi = 0; mi < modes.length; mi++) mitems[mi].dataset.mode = modes[mi];
         document.getElementById('anchor').style.display = 'block';
         document.getElementById('seg').style.display = 'flex';
@@ -796,6 +830,11 @@
     var mashqBtn = document.getElementById('mashqBtn');
     var mashqPanel = document.getElementById('mashq');
     document.querySelector('.tabs > .tab').addEventListener('click', function () { if (LEVEL === 'h' && q === 1) showList(); });
+    var suhTab = document.querySelector('.tabs > a.tab');
+    if (suhTab) suhTab.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (LEVEL === 'h' && q === 1) startSuh();
+    });
     mashqBtn.addEventListener('click', function () {
       mashqPanel.classList.toggle('open');
     });
