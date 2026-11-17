@@ -85,6 +85,15 @@
   .btns { display:flex; gap:8px; justify-content:center; margin-top:10px; }
   .btns button { padding:10px 16px; border-radius:14px; border:0; font-family:inherit; font-weight:700; background:var(--blue); color:#fff; cursor:pointer; }
   .btns button.alt { background:#e8ecf4; color:var(--text); }
+
+  .seg { display:flex; gap:6px; padding:5px; border-radius:16px; background:#e8ecf4; margin-bottom:10px; }
+  .seg button { flex:1; padding:10px 6px; border:0; border-radius:12px; background:transparent; font-family:inherit; font-size:15px; font-weight:700; color:var(--muted); cursor:pointer; }
+  .seg button.on { background:#fff; color:var(--text); box-shadow:0 2px 6px rgba(0,0,0,.08); }
+  .wl { background:#fff; border:2px solid var(--line); border-radius:20px; padding:6px 14px; margin-bottom:12px; }
+  .wl .row { display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:10px 0; border-bottom:1px solid #eef1f7; }
+  .wl .row:last-child { border-bottom:0; }
+  .wl .kr { font-size:20px; font-weight:800; }
+  .wl .uz { font-size:14px; color:var(--muted); text-align:right; }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
@@ -122,6 +131,12 @@
       <div class="ch">인</div>
       <div class="meta">koreyscha: 사람<br>o'zbekcha: odam, inson</div>
     </div>
+
+    <div class="seg" id="seg" style="display:none">
+      <button type="button" class="on" data-set="pre">Oldiga qo'shiladi</button>
+      <button type="button" data-set="post">Orqaga qo'shiladi</button>
+    </div>
+    <div class="wl" id="wl" style="display:none"></div>
 
     <div class="game" id="game">
       <div class="prompt" id="prompt"></div>
@@ -266,6 +281,31 @@
     });
     document.getElementById('next').addEventListener('click', newRound);
 
+
+    // 1-dars (인): oldiga va orqaga qo'shiluvchi so'zlar, umumiy lug'at asosida
+    var WL = {
+      pre: [['인간','inson'],['인공',"sun'iy"],['인구','aholi'],['인권','inson huquqi'],['인기','mashhurlik'],['인력','ishchi kuch'],['인사','salomlashish'],['인생','inson hayoti'],['인재','iqtidorli odam'],['인형',"qo'g'irchoq"],['인격','shaxsiyat'],['인도','trotuar'],['인류','insoniyat'],['인물','shaxs, qiyofa'],['인삼','jen-sen'],['인상','taassurot'],['인심','mehr-oqibat'],['인원','odamlar soni'],['인종','irq'],['인체','inson tanasi']],
+      post: [['개인','shaxs'],['군인','harbiy'],['노인','keksa odam'],['외국인','chet ellik'],['한국인','koreys'],['미국인','amerikalik'],['주인','egasi, xo\'jayin'],['성인','voyaga yetgan odam'],['연예인',"estrada san'atkori"],['장애인','nogiron'],['직장인','ofis xodimi'],['시인','shoir'],['연인','sevishgan'],['지식인','ziyoli'],['정치인','siyosatchi'],['미인',"go'zal ayol"],['범인','jinoyatchi'],['동양인','sharqlik'],['서양인',"g'arblik"],['부인','xonim']]
+    };
+    function renderWL(set) {
+      var box = document.getElementById('wl');
+      box.innerHTML = '';
+      WL[set].forEach(function (p) {
+        var r = document.createElement('div');
+        r.className = 'row';
+        r.innerHTML = '<span class="kr"></span><span class="uz"></span>';
+        r.querySelector('.kr').textContent = p[0];
+        r.querySelector('.uz').textContent = p[1];
+        box.appendChild(r);
+      });
+      document.querySelectorAll('#seg button').forEach(function (b) {
+        b.classList.toggle('on', b.dataset.set === set);
+      });
+    }
+    document.querySelectorAll('#seg button').forEach(function (b) {
+      b.addEventListener('click', function () { renderWL(b.dataset.set); });
+    });
+
     if (LEVEL === 'h') {
       // Hanja bo'limida "Yozish" o'rniga "So'z yasash"
       var yz = document.querySelector('#mashq a:last-child');
@@ -273,7 +313,12 @@
       yz.querySelector('.em').textContent = '🧩';
       yz.querySelector('.nm').textContent = "So'z yasash";
       yz.querySelector('.kr').textContent = '단어 만들기';
-      if (q === 1) document.getElementById('anchor').style.display = 'block';
+      if (q === 1) {
+        document.getElementById('anchor').style.display = 'block';
+        document.getElementById('seg').style.display = 'flex';
+        document.getElementById('wl').style.display = 'block';
+        renderWL('pre');
+      }
     }
 
     var mashqBtn = document.getElementById('mashqBtn');
