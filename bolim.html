@@ -112,6 +112,14 @@
   .qopts button.wrong { background:#fbe3e0; border-color:#c0392b; }
   .qopts button:disabled { cursor:default; }
   .prompt.big { font-size:40px; font-weight:800; margin:10px 0 4px; }
+
+  .syl-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:14px 0 8px; }
+  .syl { width:92px; height:100px; perspective:600px; cursor:pointer; }
+  .syl-in { position:relative; width:100%; height:100%; transition:transform .45s; transform-style:preserve-3d; }
+  .syl.flip .syl-in { transform:rotateY(180deg); }
+  .syl-f, .syl-b { position:absolute; inset:0; border-radius:16px; display:grid; place-items:center; backface-visibility:hidden; -webkit-backface-visibility:hidden; border:2px solid var(--line); text-align:center; padding:6px; box-sizing:border-box; }
+  .syl-f { background:#fff; font-size:30px; font-weight:800; color:var(--text); }
+  .syl-b { transform:rotateY(180deg); background:#eaf3ff; font-size:16px; font-weight:700; color:#2f6fdd; }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
@@ -449,6 +457,22 @@
     function learnQ(it) { LEARNED[it[0]] = true; saveLearned(); }
     function speakQ(it) { speak(it[0]); }
 
+
+    function sylTiles(it) {
+      var wrap = document.createElement('div');
+      wrap.className = 'syl-row';
+      it[2].forEach(function (c, i) {
+        var t = document.createElement('div');
+        t.className = 'syl';
+        t.innerHTML = '<div class="syl-in"><div class="syl-f"></div><div class="syl-b"></div></div>';
+        t.querySelector('.syl-f').textContent = c;
+        t.querySelector('.syl-b').textContent = it[3][i];
+        t.addEventListener('click', function () { t.classList.toggle('flip'); });
+        wrap.appendChild(t);
+      });
+      return wrap;
+    }
+
     function startQuiz(mode) {
       document.getElementById('game').classList.remove('on');
       document.getElementById('quiz').classList.add('on');
@@ -464,21 +488,25 @@
       qOpts().innerHTML = '';
       qFb('', '');
 
-      if (QZ.mode === 'kk') {
-        p.textContent = it[0];
+      if (QZ.mode === 'kk' || QZ.mode === 'ku') {
+        var korFront = QZ.mode === 'kk';
+        p.innerHTML = '';
+        if (korFront) {
+          p.appendChild(sylTiles(it));
+        } else {
+          p.textContent = it[1];
+        }
         mkBtn('Ochish', '', function () {
-          p.textContent = it[0] + ' — ' + it[1];
+          if (korFront) {
+            qFb('', '<b>' + it[1] + '</b>');
+            p.querySelectorAll('.syl').forEach(function (t) { t.classList.add('flip'); });
+          } else {
+            p.innerHTML = '';
+            p.appendChild(sylTiles(it));
+            p.querySelectorAll('.syl').forEach(function (t) { t.classList.add('flip'); });
+            qFb('', '<b>' + it[0] + '</b>');
+          }
           qOpts().innerHTML = '';
-          qFb('', bdText(it));
-          mkBtn("Bilmadim", 'alt', nextQ);
-          mkBtn('Bildim', '', function () { learnQ(it); nextQ(); });
-        });
-      } else if (QZ.mode === 'ku') {
-        p.textContent = it[1];
-        mkBtn('Ochish', '', function () {
-          p.textContent = it[0] + ' — ' + it[1];
-          qOpts().innerHTML = '';
-          qFb('', bdText(it));
           mkBtn("Bilmadim", 'alt', nextQ);
           mkBtn('Bildim', '', function () { learnQ(it); nextQ(); });
         });
