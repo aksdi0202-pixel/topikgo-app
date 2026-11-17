@@ -213,17 +213,54 @@
     render();
 
 
-    // ---- Hanja: 'So'z yasash' o'yini (faqat 2000 hancha bo'limi) ----
-    var BUILD = [
-      { w: '외국인', s: ['외', '국', '인'], uz: 'chet ellik' },
-      { w: '한국인', s: ['한', '국', '인'], uz: 'koreys' },
-      { w: '미국인', s: ['미', '국', '인'], uz: 'amerikalik' },
-      { w: '인사',   s: ['인', '사'],       uz: 'salomlashish' }
+    // ---- 1-dars (인): 40 ta so'z. [koreyscha, o'zbekcha, bo'g'inlar, bo'g'in ma'nolari]
+    var W = [
+      ['인간','inson',['인','간'],['odam','orasi']],
+      ['인공',"sun'iy",['인','공'],['odam','ish']],
+      ['인구','aholi',['인','구'],['odam',"og'iz (son)"]],
+      ['인권','inson huquqi',['인','권'],['odam','huquq']],
+      ['인기','mashhurlik',['인','기'],['odam','ruh']],
+      ['인력','ishchi kuch',['인','력'],['odam','kuch']],
+      ['인사','salomlashish',['인','사'],['odam','ish']],
+      ['인생','inson hayoti',['인','생'],['odam','hayot']],
+      ['인재','iqtidorli odam',['인','재'],['odam',"iste'dod"]],
+      ['인형',"qo'g'irchoq",['인','형'],['odam','shakl']],
+      ['인격','shaxsiyat',['인','격'],['odam','daraja']],
+      ['인도','trotuar',['인','도'],['odam',"yo'l"]],
+      ['인류','insoniyat',['인','류'],['odam','tur']],
+      ['인물','shaxs, qiyofa',['인','물'],['odam','narsa']],
+      ['인삼','jen-sen',['인','삼'],['odam','ginseng']],
+      ['인상','taassurot',['인','상'],['odam','qiyofa']],
+      ['인심','mehr-oqibat',['인','심'],['odam','yurak']],
+      ['인원','odamlar soni',['인','원'],['odam',"a'zo"]],
+      ['인종','irq',['인','종'],['odam','tur']],
+      ['인체','inson tanasi',['인','체'],['odam','tana']],
+      ['개인','shaxs',['개','인'],["bo'lak",'odam']],
+      ['군인','harbiy',['군','인'],["qo'shin",'odam']],
+      ['노인','keksa odam',['노','인'],['keksa','odam']],
+      ['외국인','chet ellik',['외','국','인'],['tashqi','davlat','odam']],
+      ['한국인','koreys',['한','국','인'],['Koreya','davlat','odam']],
+      ['미국인','amerikalik',['미','국','인'],['Amerika','davlat','odam']],
+      ['주인',"egasi, xo'jayin",['주','인'],['asosiy','odam']],
+      ['성인','voyaga yetgan odam',['성','인'],['voyaga yetmoq','odam']],
+      ['연예인',"estrada san'atkori",['연예','인'],["san'at",'odam']],
+      ['장애인','nogiron',['장애','인'],["to'siq",'odam']],
+      ['직장인','ofis xodimi',['직장','인'],['ish joyi','odam']],
+      ['시인','shoir',['시','인'],["she'r",'odam']],
+      ['연인','sevishgan',['연','인'],['sevgi','odam']],
+      ['지식인','ziyoli',['지식','인'],['bilim','odam']],
+      ['정치인','siyosatchi',['정치','인'],['siyosat','odam']],
+      ['미인',"go'zal ayol",['미','인'],["go'zal",'odam']],
+      ['범인','jinoyatchi',['범','인'],['jinoyat','odam']],
+      ['동양인','sharqlik',['동양','인'],['Sharq','odam']],
+      ['서양인',"g'arblik",['서양','인'],["G'arb",'odam']],
+      ['부인','xonim',['부','인'],['ayol','odam']]
     ];
-    var SYL = { '외': 'tashqi, chet', '국': 'davlat', '인': 'odam, inson' };
-    var DISTR = ['바', '나', '도', '가', '모', '서', '로', '료'];
-    var cur = null, seqIdx = [], tileBtns = [];
+    var ALLSYL = {};
+    W.forEach(function (x) { x[2].forEach(function (c) { ALLSYL[c] = true; }); });
+    var DISTR = ['바','나','모','서','로','타','쿠','퍼','버','테','호','루'].filter(function (c) { return !ALLSYL[c]; });
 
+    var cur = null, seqIdx = [], tileBtns = [];
     function shuffle(a) { return a.slice().sort(function () { return Math.random() - 0.5; }); }
 
     function renderBuilt() {
@@ -231,9 +268,9 @@
     }
 
     function newRound() {
-      cur = BUILD[Math.floor(Math.random() * BUILD.length)];
+      cur = W[Math.floor(Math.random() * W.length)];
       seqIdx = [];
-      var pool = shuffle(cur.s.concat(shuffle(DISTR).slice(0, 10 - cur.s.length)));
+      var pool = shuffle(cur[2].concat(shuffle(DISTR).slice(0, 10 - cur[2].length)));
       var box = document.getElementById('tiles');
       box.innerHTML = '';
       tileBtns = pool.map(function (ch, i) {
@@ -242,16 +279,16 @@
         b.className = 'tile';
         b.textContent = ch;
         b.addEventListener('click', function () {
-          if (seqIdx.length >= cur.s.length || b.disabled) return;
+          if (seqIdx.length >= cur[2].length || b.disabled) return;
           seqIdx.push(i);
           b.disabled = true;
           renderBuilt();
-          if (seqIdx.length === cur.s.length) check();
+          if (seqIdx.length === cur[2].length) check();
         });
         box.appendChild(b);
         return b;
       });
-      document.getElementById('prompt').textContent = cur.uz;
+      document.getElementById('prompt').textContent = cur[1];
       document.getElementById('built').textContent = '';
       var fb = document.getElementById('fb');
       fb.textContent = '';
@@ -261,13 +298,13 @@
     function check() {
       var fb = document.getElementById('fb');
       var made = seqIdx.map(function (i) { return tileBtns[i].textContent; }).join('');
-      if (made === cur.w) {
-        var parts = cur.s.filter(function (c) { return SYL[c]; }).map(function (c) { return c + ' — ' + SYL[c]; });
+      if (made === cur[0]) {
+        var parts = cur[2].map(function (c, i) { return c + ' — ' + cur[3][i]; });
         fb.className = 'fb ok';
-        fb.innerHTML = cur.w + ' ✔<br>' + parts.join(' · ');
+        fb.innerHTML = cur[0] + ' ✔<br>' + parts.join(' · ');
       } else {
         fb.className = 'fb no';
-        fb.textContent = 'Bunday so\'z yo\'q. Orqaga qaytib qayta urining.';
+        fb.textContent = "Bunday so'z yo'q. Orqaga qaytib qayta urining.";
       }
     }
 
@@ -281,11 +318,10 @@
     });
     document.getElementById('next').addEventListener('click', newRound);
 
-
-    // 1-dars (인): oldiga va orqaga qo'shiluvchi so'zlar, umumiy lug'at asosida
+    // Ro'yxat: oldiga va orqaga qo'shiluvchilar
     var WL = {
-      pre: [['인간','inson'],['인공',"sun'iy"],['인구','aholi'],['인권','inson huquqi'],['인기','mashhurlik'],['인력','ishchi kuch'],['인사','salomlashish'],['인생','inson hayoti'],['인재','iqtidorli odam'],['인형',"qo'g'irchoq"],['인격','shaxsiyat'],['인도','trotuar'],['인류','insoniyat'],['인물','shaxs, qiyofa'],['인삼','jen-sen'],['인상','taassurot'],['인심','mehr-oqibat'],['인원','odamlar soni'],['인종','irq'],['인체','inson tanasi']],
-      post: [['개인','shaxs'],['군인','harbiy'],['노인','keksa odam'],['외국인','chet ellik'],['한국인','koreys'],['미국인','amerikalik'],['주인','egasi, xo\'jayin'],['성인','voyaga yetgan odam'],['연예인',"estrada san'atkori"],['장애인','nogiron'],['직장인','ofis xodimi'],['시인','shoir'],['연인','sevishgan'],['지식인','ziyoli'],['정치인','siyosatchi'],['미인',"go'zal ayol"],['범인','jinoyatchi'],['동양인','sharqlik'],['서양인',"g'arblik"],['부인','xonim']]
+      pre: W.filter(function (x) { return x[2][0] === '인'; }).map(function (x) { return [x[0], x[1]]; }),
+      post: W.filter(function (x) { return x[2][0] !== '인' && x[2][x[2].length - 1] === '인'; }).map(function (x) { return [x[0], x[1]]; })
     };
     function renderWL(set) {
       var box = document.getElementById('wl');
