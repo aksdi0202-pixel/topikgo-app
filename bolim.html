@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bo'lim · Essential Korean Words 2000</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="hanja-data.js?v=8"></script>
+<script src="hanja-data.js?v=9"></script>
 <style>
   :root { --bg:#e9f2fc; --text:#1d2433; --muted:#6b7385; --line:#d6dce8; --blue:#2f6fdd; }
   * { box-sizing: border-box; }
@@ -287,7 +287,7 @@
     var LEVEL_NAME = LEVEL === 'o' ? "O'rta · 중급" : LEVEL === 'h' ? "2000 hancha" : "Boshlang'ich · 초급";
     var q = parseInt(new URLSearchParams(location.search).get('q'), 10);
     if (!(q >= 1 && q <= COUNTS.length)) q = 1;
-    var DARS = parseInt(new URLSearchParams(location.search).get('d'), 10) || 1;
+    var DARS = parseInt(new URLSearchParams(location.search).get('d'), 10) || ((q - 1) * 5 + 1);
 
     var before = 0;
     for (var i = 0; i < q - 1; i++) before += COUNTS[i];
@@ -334,7 +334,7 @@
           // Hanja: har bir dars alohida sahifa (d=N)
           if (num === DARS) b.classList.add('on');
           b.addEventListener('click', function () {
-            location.href = 'bolim.html?level=h&q=' + q + '&d=' + num + '&v=8';
+            location.href = 'bolim.html?level=h&q=' + q + '&d=' + num + '&v=9';
           });
           wrap.appendChild(b);
           return;
@@ -849,7 +849,7 @@
       yz.querySelector('.em').textContent = '🧩';
       yz.querySelector('.nm').textContent = "So'z yasash";
       yz.querySelector('.kr').textContent = '단어 만들기';
-      if (q === 1) {
+      {
         var mitems = document.querySelectorAll('#mashq a');
         var modes = ['kk', 'ku', 'tu', 'tk', 'es'];
         for (var mi = 0; mi < modes.length; mi++) mitems[mi].dataset.mode = modes[mi];
@@ -863,12 +863,12 @@
     var mashqBtn = document.getElementById('mashqBtn');
     var mashqPanel = document.getElementById('mashq');
     document.querySelector('.tabs > .tab').addEventListener('click', function () {
-      if (LEVEL === 'h' && q === 1) { document.querySelectorAll('.tabs .tab').forEach(function (t) { t.classList.remove('on'); }); this.classList.add('on'); showList(); }
+      if (LEVEL === 'h') { document.querySelectorAll('.tabs .tab').forEach(function (t) { t.classList.remove('on'); }); this.classList.add('on'); showList(); }
     });
     var suhTab = document.querySelector('.tabs > a.tab');
     if (suhTab) suhTab.addEventListener('click', function (e) {
       e.preventDefault();
-      if (LEVEL === 'h' && q === 1) { document.querySelectorAll('.tabs .tab').forEach(function (t) { t.classList.remove('on'); }); suhTab.classList.add('on'); startSuh(); }
+      if (LEVEL === 'h') { document.querySelectorAll('.tabs .tab').forEach(function (t) { t.classList.remove('on'); }); suhTab.classList.add('on'); startSuh(); }
     });
     mashqBtn.addEventListener('click', function () {
       mashqPanel.classList.toggle('open');
