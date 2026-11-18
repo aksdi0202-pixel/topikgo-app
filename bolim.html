@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bo'lim · Essential Korean Words 2000</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="hanja-data.js?v=15"></script>
+<script src="hanja-data.js?v=16"></script>
 <style>
   :root { --bg:#e9f2fc; --text:#1d2433; --muted:#6b7385; --line:#d6dce8; --blue:#2f6fdd; }
   * { box-sizing: border-box; }
@@ -203,6 +203,8 @@
     </div>
 
 
+    <div class="chips" id="pchips" style="display:none"></div>
+
     <div class="dk" id="deck">
       <div class="dbar"><span class="dprog" id="dprog"></span></div>
       <div class="dbar">
@@ -334,7 +336,7 @@
           // Hanja: har bir dars alohida sahifa (d=N)
           if (num === DARS) b.classList.add('on');
           b.addEventListener('click', function () {
-            location.href = 'bolim.html?level=h&q=' + q + '&d=' + num + '&v=15';
+            location.href = 'bolim.html?level=h&q=' + q + '&d=' + num + '&v=16';
           });
           wrap.appendChild(b);
           return;
@@ -438,6 +440,7 @@
       ['그분은 제 부인입니다.', 'U mening xotinim.']
     ];
     W.forEach(function (x, i) { x[4] = SENT[i]; });
+    var W1 = W;
     // Hanja: 2-5 darslar ma'lumoti hanja-data.js dan olinadi (1-dars yuqoridagi massiv)
     var CH = '인';
     if (LEVEL === 'h' && DARS > 1 && window.HANJA && window.HANJA[DARS]) {
@@ -448,6 +451,40 @@
     }
     var ALLSYL = {};
     W.forEach(function (x) { x[2].forEach(function (c) { ALLSYL[c] = true; }); });
+    // Mashq va kartochka: tanlangan darslarning so'zlari birlashtiriladi (tanlanmasa joriy dars)
+    var PSEL = [];
+    var pwrap = document.getElementById('pchips');
+    function PW() {
+      if (LEVEL !== 'h' || !PSEL.length) return W;
+      var out = [];
+      PSEL.slice().sort(function (a, b) { return a - b; }).forEach(function (d) {
+        var items = d === 1 ? W1 : (window.HANJA[d] ? window.HANJA[d].items : []);
+        out = out.concat(items);
+      });
+      return out;
+    }
+    function renderPchips() {
+      pwrap.innerHTML = '';
+      for (var n = lo; n <= hi; n++) {
+        (function (num) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'chip' + (PSEL.indexOf(num) >= 0 ? ' on' : '');
+          b.textContent = num + '-dars';
+          b.addEventListener('click', function () {
+            var i = PSEL.indexOf(num);
+            if (i >= 0) PSEL.splice(i, 1); else PSEL.push(num);
+            renderPchips();
+          });
+          pwrap.appendChild(b);
+        })(n);
+      }
+    }
+    function showPchips(on) {
+      if (!on || LEVEL !== 'h') { pwrap.style.display = 'none'; return; }
+      renderPchips();
+      pwrap.style.display = 'flex';
+    }
     var DISTR = ['바','나','모','서','로','타','쿠','퍼','버','테','호','루'].filter(function (c) { return !ALLSYL[c]; });
 
     var cur = null, seqIdx = [], tileBtns = [];
@@ -637,7 +674,7 @@
 
 
     // ---- 1-dars mashqlari: kartochka va testlar (faqat 2000 hancha, 1-dars) ----
-    var QZ = { mode: null, it: null };
+    var QZ = { mode: null, it: null, items: W };
     function shuffleQ(a) { return a.slice().sort(function () { return Math.random() - 0.5; }); }
     function bdText(it) { return it[2].map(function (c, i) { return c + ' — ' + it[3][i]; }).join(' · '); }
     function qFb(cls, html) { var f = document.getElementById('qfb'); f.className = 'fb ' + (cls || ''); f.innerHTML = html || ''; }
@@ -670,6 +707,7 @@
 
     function showPractice() {
       clearDeckTimers();
+      showPchips(false);
       document.getElementById('anchor').style.display = 'none';
       document.getElementById('seg').style.display = 'none';
       document.getElementById('wl').style.display = 'none';
@@ -681,6 +719,7 @@
     }
     function showList() {
       clearDeckTimers();
+      showPchips(false);
       document.getElementById('deck').classList.remove('on');
       document.getElementById('suh').classList.remove('on');
       document.getElementById('quiz').classList.remove('on');
@@ -691,11 +730,11 @@
     }
 
     // ---- Kartochka (deck): 40 ta so'z, oldinga/orqaga, aralash, timer ----
-    var DK = { dir: 'ku', list: [], idx: 0, flipped: false, sec: 0, timers: [] };
+    var DK = { dir: 'ku', items: W, list: [], idx: 0, flipped: false, sec: 0, timers: [] };
     function clearDeckTimers() { DK.timers.forEach(clearTimeout); DK.timers = []; }
     function dkRender() {
       var i = DK.list[DK.idx];
-      var it = W[i];
+      var it = DK.items[i];
       var ku = DK.dir === 'ku';
       document.getElementById('dfront').textContent = ku ? it[0] : it[1];
       document.getElementById('dback').textContent = ku ? it[1] : it[0];
@@ -730,9 +769,11 @@
     }
     function startDeck(dir) {
       showPractice();
+      showPchips(true);
       document.getElementById('deck').classList.add('on');
       DK.dir = dir;
-      DK.list = W.map(function (_, i) { return i; });
+      DK.items = PW();
+      DK.list = DK.items.map(function (_, i) { return i; });
       DK.idx = 0; DK.flipped = false;
       dkRender();
     }
@@ -745,7 +786,7 @@
     document.getElementById('dlist').addEventListener('click', showList);
     document.getElementById('dknow').addEventListener('click', function (e) {
       e.stopPropagation();
-      var it = W[DK.list[DK.idx]];
+      var it = DK.items[DK.list[DK.idx]];
       if (LEARNED[it[0]]) { delete LEARNED[it[0]]; } else { LEARNED[it[0]] = true; }
       saveLearned();
       document.getElementById('dknow').classList.toggle('on', !!LEARNED[it[0]]);
@@ -775,6 +816,8 @@
 
     function startQuiz(mode) {
       showPractice();
+      showPchips(true);
+      QZ.items = PW();
       document.getElementById('game').classList.remove('on');
       document.getElementById('quiz').classList.add('on');
       QZ.mode = mode;
@@ -782,7 +825,8 @@
     }
 
     function nextQ() {
-      var it = W[Math.floor(Math.random() * W.length)];
+      var QI = QZ.items;
+      var it = QI[Math.floor(Math.random() * QI.length)];
       QZ.it = it;
       var p = document.getElementById('qprompt');
       p.onclick = null;
@@ -814,9 +858,9 @@
       } else {
         // Testlar: 'tu' (kor → uz), 'tk' (uz → kor), 'es' (eshitish → uz)
         var prompt, correct, pool;
-        if (QZ.mode === 'tu') { prompt = it[0]; correct = it[1]; pool = W.map(function (x) { return x[1]; }); }
-        else if (QZ.mode === 'tk') { prompt = it[1]; correct = it[0]; pool = W.map(function (x) { return x[0]; }); }
-        else { prompt = '🔊'; correct = it[1]; pool = W.map(function (x) { return x[1]; }); }
+        if (QZ.mode === 'tu') { prompt = it[0]; correct = it[1]; pool = QI.map(function (x) { return x[1]; }); }
+        else if (QZ.mode === 'tk') { prompt = it[1]; correct = it[0]; pool = QI.map(function (x) { return x[0]; }); }
+        else { prompt = '🔊'; correct = it[1]; pool = QI.map(function (x) { return x[1]; }); }
         p.textContent = prompt;
         if (QZ.mode === 'es') { p.onclick = function () { speakQ(it); }; setTimeout(function () { speakQ(it); }, 150); }
         var wrong = shuffleQ(pool.filter(function (x) { return x !== correct; })).slice(0, 3);
