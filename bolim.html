@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bo'lim · Essential Korean Words 2000</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="hanja-data.js?v=8"></script>
 <style>
   :root { --bg:#e9f2fc; --text:#1d2433; --muted:#6b7385; --line:#d6dce8; --blue:#2f6fdd; }
   * { box-sizing: border-box; }
@@ -286,6 +287,7 @@
     var LEVEL_NAME = LEVEL === 'o' ? "O'rta · 중급" : LEVEL === 'h' ? "2000 hancha" : "Boshlang'ich · 초급";
     var q = parseInt(new URLSearchParams(location.search).get('q'), 10);
     if (!(q >= 1 && q <= COUNTS.length)) q = 1;
+    var DARS = parseInt(new URLSearchParams(location.search).get('d'), 10) || 1;
 
     var before = 0;
     for (var i = 0; i < q - 1; i++) before += COUNTS[i];
@@ -319,7 +321,7 @@
     allChip.className = 'chip';
     allChip.textContent = 'Barchasi';
     allChip.addEventListener('click', function () { picked = []; render(); });
-    wrap.appendChild(allChip);
+    if (LEVEL !== 'h') wrap.appendChild(allChip);
 
     for (var n = lo; n <= hi; n++) {
       (function (num) {
@@ -328,6 +330,15 @@
         b.className = 'chip';
         b.dataset.n = num;
         b.textContent = num + '-dars';
+        if (LEVEL === 'h') {
+          // Hanja: har bir dars alohida sahifa (d=N)
+          if (num === DARS) b.classList.add('on');
+          b.addEventListener('click', function () {
+            location.href = 'bolim.html?level=h&q=' + q + '&d=' + num + '&v=8';
+          });
+          wrap.appendChild(b);
+          return;
+        }
         b.addEventListener('click', function () {
           var idx = picked.indexOf(num);
           if (idx >= 0) picked.splice(idx, 1); else picked.push(num);
@@ -427,6 +438,14 @@
       ['그분은 제 부인입니다.', 'U mening xotinim.']
     ];
     W.forEach(function (x, i) { x[4] = SENT[i]; });
+    // Hanja: 2-5 darslar ma'lumoti hanja-data.js dan olinadi (1-dars yuqoridagi massiv)
+    var CH = '인';
+    if (LEVEL === 'h' && DARS > 1 && window.HANJA && window.HANJA[DARS]) {
+      W = window.HANJA[DARS].items;
+      CH = window.HANJA[DARS].ch;
+      document.querySelector('#anchor .ch').textContent = CH;
+      document.querySelector('#anchor .meta').innerHTML = window.HANJA[DARS].meta;
+    }
     var ALLSYL = {};
     W.forEach(function (x) { x[2].forEach(function (c) { ALLSYL[c] = true; }); });
     var DISTR = ['바','나','모','서','로','타','쿠','퍼','버','테','호','루'].filter(function (c) { return !ALLSYL[c]; });
@@ -530,8 +549,8 @@
 
     // Ro'yxat: oldiga va orqaga qo'shiluvchilar
     var WL = {
-      pre: W.filter(function (x) { return x[2][0] === '인'; }).map(function (x) { return [x[0], x[1]]; }),
-      post: W.filter(function (x) { return x[2][0] !== '인' && x[2][x[2].length - 1] === '인'; }).map(function (x) { return [x[0], x[1]]; })
+      pre: W.filter(function (x) { return x[2][0] === CH; }).map(function (x) { return [x[0], x[1]]; }),
+      post: W.filter(function (x) { return x[2][0] !== CH && x[2][x[2].length - 1] === CH; }).map(function (x) { return [x[0], x[1]]; })
     };
     var LEARNED = {};
     try { LEARNED = JSON.parse(localStorage.getItem('hancha1_learned') || '{}'); } catch (e) { LEARNED = {}; }
