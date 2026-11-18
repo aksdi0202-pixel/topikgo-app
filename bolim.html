@@ -203,8 +203,6 @@
     </div>
 
 
-    <div class="chips" id="pchips" style="display:none"></div>
-
     <div class="dk" id="deck">
       <div class="dbar"><span class="dprog" id="dprog"></span></div>
       <div class="dbar">
@@ -308,6 +306,7 @@
 
     // Chiplar: "Barchasi" hammasini bildiradi, darslar esa bir nechtasini tanlash uchun
     var picked = [];
+    var PRACT = false;
     var wrap = document.getElementById('chips');
     var allChip = null;
 
@@ -315,6 +314,13 @@
       allChip.classList.toggle('on', picked.length === 0);
       wrap.querySelectorAll('.chip[data-n]').forEach(function (c) {
         c.classList.toggle('on', picked.indexOf(Number(c.dataset.n)) >= 0);
+      });
+    }
+
+    function hChipsRefresh() {
+      wrap.querySelectorAll('.chip[data-n]').forEach(function (c) {
+        var n2 = Number(c.dataset.n);
+        c.classList.toggle('on', PRACT ? PSEL.indexOf(n2) >= 0 : n2 === DARS);
       });
     }
 
@@ -334,8 +340,13 @@
         b.textContent = num + '-dars';
         if (LEVEL === 'h') {
           // Hanja: har bir dars alohida sahifa (d=N)
-          if (num === DARS) b.classList.add('on');
           b.addEventListener('click', function () {
+            if (PRACT) {
+              var i2 = PSEL.indexOf(num);
+              if (i2 >= 0) PSEL.splice(i2, 1); else PSEL.push(num);
+              hChipsRefresh();
+              return;
+            }
             location.href = 'bolim.html?level=h&q=' + q + '&d=' + num + '&v=16';
           });
           wrap.appendChild(b);
@@ -350,6 +361,7 @@
       })(n);
     }
     render();
+    if (LEVEL === 'h') hChipsRefresh();
 
 
     // ---- 1-dars (인): 40 ta so'z. [koreyscha, o'zbekcha, bo'g'inlar, bo'g'in ma'nolari]
@@ -451,9 +463,7 @@
     }
     var ALLSYL = {};
     W.forEach(function (x) { x[2].forEach(function (c) { ALLSYL[c] = true; }); });
-    // Mashq va kartochka: tanlangan darslarning so'zlari birlashtiriladi (tanlanmasa joriy dars)
     var PSEL = [];
-    var pwrap = document.getElementById('pchips');
     function PW() {
       if (LEVEL !== 'h' || !PSEL.length) return W;
       var out = [];
@@ -462,28 +472,6 @@
         out = out.concat(items);
       });
       return out;
-    }
-    function renderPchips() {
-      pwrap.innerHTML = '';
-      for (var n = lo; n <= hi; n++) {
-        (function (num) {
-          var b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'chip' + (PSEL.indexOf(num) >= 0 ? ' on' : '');
-          b.textContent = num + '-dars';
-          b.addEventListener('click', function () {
-            var i = PSEL.indexOf(num);
-            if (i >= 0) PSEL.splice(i, 1); else PSEL.push(num);
-            renderPchips();
-          });
-          pwrap.appendChild(b);
-        })(n);
-      }
-    }
-    function showPchips(on) {
-      if (!on || LEVEL !== 'h') { pwrap.style.display = 'none'; return; }
-      renderPchips();
-      pwrap.style.display = 'flex';
     }
     var DISTR = ['바','나','모','서','로','타','쿠','퍼','버','테','호','루'].filter(function (c) { return !ALLSYL[c]; });
 
@@ -707,7 +695,7 @@
 
     function showPractice() {
       clearDeckTimers();
-      showPchips(false);
+      PRACT = false; if (LEVEL === 'h') hChipsRefresh();
       document.getElementById('anchor').style.display = 'none';
       document.getElementById('seg').style.display = 'none';
       document.getElementById('wl').style.display = 'none';
@@ -719,7 +707,7 @@
     }
     function showList() {
       clearDeckTimers();
-      showPchips(false);
+      PRACT = false; if (LEVEL === 'h') hChipsRefresh();
       document.getElementById('deck').classList.remove('on');
       document.getElementById('suh').classList.remove('on');
       document.getElementById('quiz').classList.remove('on');
@@ -769,7 +757,7 @@
     }
     function startDeck(dir) {
       showPractice();
-      showPchips(true);
+      PRACT = true; hChipsRefresh();
       document.getElementById('deck').classList.add('on');
       DK.dir = dir;
       DK.items = PW();
@@ -816,7 +804,7 @@
 
     function startQuiz(mode) {
       showPractice();
-      showPchips(true);
+      PRACT = true; hChipsRefresh();
       QZ.items = PW();
       document.getElementById('game').classList.remove('on');
       document.getElementById('quiz').classList.add('on');
