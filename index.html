@@ -49,7 +49,8 @@
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
     opacity: .22;
   }
-  button.btn { width: 100%; font-family: inherit; cursor: pointer; border-style: solid; }
+  button.btn { width: 100%; font-family: inherit; cursor: pointer; border-style: solid; text-align: left; }
+  button.btn > span:first-child { flex: 1; text-align: left; }
   .drawer-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; pointer-events: none;
     transition: opacity .25s ease; z-index: 10;
