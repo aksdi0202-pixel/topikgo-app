@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쏙쏙 TOPIK · TopikGo</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { --bg:#f4f7fb; --text:#1d2433; --muted:#6b7385; --line:#9FE1CB; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center;
+    padding: 16px 16px 32px;
+  }
+  .wrap { width: 100%; max-width: 420px; }
+  .top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .back {
+    text-decoration: none; color: var(--text); font-size: 24px; line-height: 1;
+    width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #fff;
+    border: 1px solid #dde3ec;
+  }
+  .label { font-size: 13px; color: var(--muted); letter-spacing: .5px; margin: 0; }
+  .title { font-size: 22px; font-weight: 700; margin: 2px 0 0; }
+  .title small { font-size: 15px; font-weight: 500; color: var(--muted); }
+  .list { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+  .card {
+    display: flex; align-items: baseline; gap: 8px; text-decoration: none; color: var(--text);
+    background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 16px;
+  }
+  .card-name { font-size: 20px; font-weight: 700; }
+  .card-kor { font-size: 13px; color: var(--muted); }
+  .card:active { transform: translateY(2px); }
+  .card.disabled { opacity: .55; pointer-events: none; }
+  .count { text-align: center; color: var(--muted); font-size: 14px; margin-top: 16px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="index.html" aria-label="Orqaga">‹</a>
+    </div>
+    <p class="label">쏙쏙 TOPIK</p>
+    <h1 class="title">Lug'at <small>쏙쏙</small></h1>
+    <nav class="list">
+      <a class="card" href="beginner.html?v=1"><span class="card-name">Boshlang'ich</span><span class="card-kor">초급</span></a>
+      <a class="card" href="orta.html?v=1"><span class="card-name">O'rta</span><span class="card-kor">중급</span></a>
+      <a class="card disabled" href="#"><span class="card-name">Yuqori</span><span class="card-kor">고급</span></a>
+    </nav>
+    <p class="count">2 / 3 ochiq</p>
+  </div>
+  <script>
+    try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
+  </script>
+</body>
+</html>
