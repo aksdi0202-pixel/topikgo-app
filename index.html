@@ -106,5 +106,30 @@
     document.getElementById('closeDrawer').onclick = () => setDrawer(false);
     overlay.onclick = () => setDrawer(false);
   </script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script>
+    // Firebase loyihasidagi kalitlar bilan almashtiring
+    const PRESENCE_CONFIG = {
+      apiKey: "KODINGIZ",
+      databaseURL: "https://KODINGIZ-default-rtdb.firebaseio.com",
+      projectId: "KODINGIZ"
+    };
+    try {
+      if (PRESENCE_CONFIG.apiKey !== "KODINGIZ") {
+        firebase.initializeApp(PRESENCE_CONFIG);
+        const db = firebase.database();
+        const myRef = db.ref('online/' + Math.random().toString(36).slice(2) + Date.now().toString(36));
+        db.ref('.info/connected').on('value', snap => {
+          if (snap.val() === true) {
+            myRef.set(Date.now());
+            myRef.onDisconnect().remove();
+          }
+        });
+        setInterval(() => { myRef.set(Date.now()); }, 30000);
+      }
+    } catch (e) {}
+  </script>
 </body>
 </html>
