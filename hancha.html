@@ -84,18 +84,62 @@
     try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
 
     const HANCHA_PASS = "111";
+    const MAX_TRIES = 3;
+    const LOCK_MS = 5 * 60 * 1000;
     const gate = document.getElementById('gate');
     const input = document.getElementById('gatePass');
+    const btn = document.getElementById('gateBtn');
     const err = document.getElementById('gateErr');
-    function unlock() { try { sessionStorage.setItem('hanchaOk', '1'); } catch (e) {} gate.style.display = 'none'; }
-    function checkPass() {
-      if (input.value === HANCHA_PASS) { unlock(); }
-      else { err.textContent = "Parol noto'g'ri"; input.value = ''; input.focus(); }
+    let timer = null;
+
+    function getState() {
+      try { return JSON.parse(localStorage.getItem('hanchaGate') || '{}'); } catch (e) { return {}; }
     }
-    let ok = false;
-    try { ok = sessionStorage.getItem('hanchaOk') === '1'; } catch (e) {}
-    if (!ok) { gate.style.display = 'flex'; input.focus(); }
-    document.getElementById('gateBtn').onclick = checkPass;
+    function setState(s) { try { localStorage.setItem('hanchaGate', JSON.stringify(s)); } catch (e) {} }
+    function unlock() { setState({ ok: true }); gate.style.display = 'none'; }
+    function setLocked(on) { input.disabled = on; btn.disabled = on; }
+
+    function tick(until) {
+      const left = Math.max(0, until - Date.now());
+      if (left <= 0) {
+        clearInterval(timer); timer = null;
+        setLocked(false); err.textContent = ''; setState({ tries: 0 }); input.focus();
+        return;
+      }
+      const m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+      err.textContent = "Qayta urinish: " + m + ":" + String(s).padStart(2, '0');
+    }
+    function startLock(until) {
+      setLocked(true);
+      tick(until);
+      timer = setInterval(() => tick(until), 1000);
+    }
+
+    function checkPass() {
+      const s = getState();
+      if (s.lockUntil && s.lockUntil > Date.now()) { startLock(s.lockUntil); return; }
+      if (input.value === HANCHA_PASS) { unlock(); return; }
+      const tries = (s.tries || 0) + 1;
+      if (tries >= MAX_TRIES) {
+        const until = Date.now() + LOCK_MS;
+        setState({ tries: 0, lockUntil: until });
+        input.value = '';
+        startLock(until);
+      } else {
+        setState({ tries });
+        err.textContent = "Parol noto'g'ri (" + (MAX_TRIES - tries) + " urinish qoldi)";
+        input.value = ''; input.focus();
+      }
+    }
+
+    const st = getState();
+    if (st.ok) { gate.style.display = 'none'; }
+    else {
+      gate.style.display = 'flex';
+      if (st.lockUntil && st.lockUntil > Date.now()) startLock(st.lockUntil);
+      else input.focus();
+    }
+    btn.onclick = checkPass;
     input.addEventListener('keydown', e => { if (e.key === 'Enter') checkPass(); });
   </script>
 </body>
