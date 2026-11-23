@@ -73,8 +73,30 @@
     <a class="qism" href="bolim.html?level=h&q=9&v=16" style="--d:-4.8s"><div class="qism-in"><span class="qism-title">9-guruh</span><span class="qism-meta">41–45 darslar · 5 ta</span></div></a>
     <a class="qism" href="bolim.html?level=h&q=10&v=6" style="--d:-5.4s"><div class="qism-in"><span class="qism-title">10-guruh</span><span class="qism-meta">46–50 darslar · 5 ta</span></div></a>
   </nav>
+  <div id="gate" style="position:fixed;inset:0;z-index:50;background:#f4f7fb;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;">
+    <p style="margin:0;font-size:18px;font-weight:700;color:#1d2433;">Parolni kiriting</p>
+    <input id="gatePass" type="password" inputmode="numeric" autocomplete="off" style="width:100%;max-width:260px;padding:12px 14px;font-size:18px;border:1px solid #c9d3e0;border-radius:14px;text-align:center;">
+    <button id="gateBtn" type="button" style="width:100%;max-width:260px;padding:12px;font-size:16px;font-weight:700;color:#fff;background:#1f4e78;border:none;border-radius:14px;cursor:pointer;">Kirish</button>
+    <p id="gateErr" style="margin:0;font-size:14px;color:#b93a2b;min-height:18px;"></p>
+    <a href="index.html" style="font-size:14px;color:#6b7385;">Orqaga</a>
+  </div>
   <script>
     try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
+
+    const HANCHA_PASS = "111";
+    const gate = document.getElementById('gate');
+    const input = document.getElementById('gatePass');
+    const err = document.getElementById('gateErr');
+    function unlock() { try { sessionStorage.setItem('hanchaOk', '1'); } catch (e) {} gate.style.display = 'none'; }
+    function checkPass() {
+      if (input.value === HANCHA_PASS) { unlock(); }
+      else { err.textContent = "Parol noto'g'ri"; input.value = ''; input.focus(); }
+    }
+    let ok = false;
+    try { ok = sessionStorage.getItem('hanchaOk') === '1'; } catch (e) {}
+    if (!ok) { gate.style.display = 'flex'; input.focus(); }
+    document.getElementById('gateBtn').onclick = checkPass;
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') checkPass(); });
   </script>
 </body>
 </html>
