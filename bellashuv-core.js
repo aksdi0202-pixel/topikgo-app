@@ -1,9 +1,9 @@
 // Bellashuv: umumiy sozlamalar va yordamchi funksiyalar.
 // Firebase loyihangizdan olingan qiymatlarni shu yerga qo'ying.
 const BELL_CONFIG = {
-  apiKey: "KODINGIZ",
-  databaseURL: "https://KODINGIZ-default-rtdb.firebaseio.com",
-  projectId: "KODINGIZ"
+  apiKey: "AIzaSyBuaSb9rso27Ul3uEIzZR0rp8VUswI8CtI",
+  databaseURL: "https://bellashuv-a7b16-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "bellashuv-a7b16"
 };
 
 const BELL = {
