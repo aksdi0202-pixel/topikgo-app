@@ -123,7 +123,6 @@
     $('roomCard').style.display = 'block';
     $('code').textContent = code;
     const url = new URL('join.html?room=' + code, location.href).href;
-    $('link').textContent = url;
     $('qr').innerHTML = '';
     new QRCode($('qr'), { text: url, width: 200, height: 200 });
 
