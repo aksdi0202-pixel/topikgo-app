@@ -10,7 +10,7 @@
   * { box-sizing: border-box; }
   body {
     margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center;
+    background: #CFF2E3; color: var(--text); display: flex; flex-direction: column; align-items: center;
     padding: 16px 16px 32px;
   }
   .wrap { width: 100%; max-width: 420px; }
@@ -25,25 +25,21 @@
   .title small { font-size: 15px; font-weight: 500; color: var(--muted); }
   .list { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
   .card {
-    position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-decoration: none; color: #fff; border-radius: 24px; padding: 18px 16px 22px; min-height: 130px;
-    background: var(--bg-c); border: 2px solid rgba(150,235,255,.9);
-    box-shadow: 0 10px 0 var(--shade), 0 0 18px var(--glow);
-    transition: transform .12s ease, box-shadow .12s ease;
+    display: flex; align-items: center; justify-content: space-between;
+    text-decoration: none; color: var(--ink); border-radius: 18px; padding: 18px 16px; min-height: 88px;
+    background: var(--bg-c); border: 2px solid #fff;
+    box-shadow: 0 0 6px #fff, 0 0 16px rgba(255,255,255,.9), 0 0 30px rgba(255,255,255,.6);
+    transition: transform .12s ease;
   }
-  .card::before {
-    content: ""; position: absolute; left: 14px; right: 14px; top: 6px; height: 44%;
-    border-radius: 18px; background: linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,.05)); pointer-events: none;
+  .card-name { font-size: 20px; font-weight: 700; }
+  .card-arrow {
+    width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--ink);
+    display: flex; align-items: center; justify-content: center; font-size: 22px; flex: 0 0 40px;
   }
-  .card-name {
-    position: relative; font-size: 16px; font-weight: 700; padding: 4px 14px;
-    background: rgba(255,255,255,.2); border-radius: 14px;
-  }
-  .card-kor { position: relative; font-size: 30px; font-weight: 800; margin-top: 8px; }
-  .card:active { transform: translateY(6px); box-shadow: 0 4px 0 var(--shade); }
-  .card-yellow { --bg-c: linear-gradient(90deg,#f5b700,#ffd21f); --shade: #8a6200; --glow: rgba(255,200,0,.55); color: #2b1d00; border-color: rgba(255,240,170,.95); }
-  .card-green { --bg-c: linear-gradient(90deg,#2ea55a,#5fcf86); --shade: #0e5a30; --glow: rgba(60,200,120,.5); }
-  .card-navy { --bg-c: linear-gradient(90deg,#1c2566,#3a4aa8); --shade: #0a0f33; --glow: rgba(60,90,220,.5); }
+  .card:active { transform: translateY(3px); }
+  .card-yellow { --bg-c: #EEEDFE; --ink: #26215C; }
+  .card-green { --bg-c: #EAF3DE; --ink: #173404; }
+  .card-navy { --bg-c: #FBEAF0; --ink: #4B1528; }
   .card.disabled { opacity: .55; pointer-events: none; }
   .count { text-align: left; color: var(--muted); font-size: 14px; margin: 16px 0 0; }
 </style>
@@ -56,9 +52,9 @@
     <p class="label">쏙쏙 TOPIK</p>
     <h1 class="title">Lug'atlar <small>어휘</small></h1>
     <nav class="list">
-      <a class="card card-yellow" href="beginner.html?v=1"><span class="card-name">TOPIK 1 va 2</span></a>
-      <a class="card card-green" href="orta.html?v=1"><span class="card-name">TOPIK 3 va 4</span></a>
-      <a class="card card-navy disabled" href="#"><span class="card-name">TOPIK 5 va 6</span></a>
+      <a class="card card-yellow" href="beginner.html?v=1"><span class="card-name">TOPIK 1 va 2</span><span class="card-arrow">›</span></a>
+      <a class="card card-green" href="orta.html?v=1"><span class="card-name">TOPIK 3 va 4</span><span class="card-arrow">›</span></a>
+      <a class="card card-navy disabled" href="#"><span class="card-name">TOPIK 5 va 6</span><span class="card-arrow">›</span></a>
     </nav>
     <p class="count">2 / 3 ochiq</p>
   </div>
