@@ -39,6 +39,12 @@
     color: var(--muted); text-decoration: none; border: 0; background: transparent; cursor: pointer; font-family: inherit;
   }
   .tab.on { background: #fff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+  .tabrow { display: flex; gap: 8px; align-items: stretch; margin-bottom: 14px; }
+  .tabrow .tabs { flex: 1; margin-bottom: 0; }
+  .bell-btn {
+    display: flex; align-items: center; padding: 0 14px; border-radius: 16px; background: #534AB7; color: #fff;
+    font-weight: 700; font-size: 14px; text-decoration: none; white-space: nowrap; box-shadow: 0 4px 0 #26215C;
+  }
 
   .tabwrap { flex: 1; position: relative; display: flex; }
   .tabwrap .tab { width: 100%; }
@@ -178,6 +184,7 @@
       <h1 id="title">Bo'lim<small id="range"></small></h1>
     </div>
 
+    <div class="tabrow">
     <div class="tabs">
       <button class="tab on" type="button">Ro'yxat</button>
       <div class="tabwrap">
@@ -192,6 +199,8 @@
     </div>
       </div>
       <a class="tab" href="#">Suhbat</a>
+    </div>
+    <a class="bell-btn" href="bellashuv.html">Bellashuv</a>
     </div>
 
 
