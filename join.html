@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bellashuv · o'yinchi</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="hanja-data.js?v=16"></script>
+<script src="bellashuv-core.js?v=1"></script>
+<style>
+  :root { --bg:#f4f7fb; --text:#1d2433; --muted:#6b7385; --accent:#534AB7; --ok:#1D9E75; --bad:#b93a2b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); padding:16px; min-height:100vh; }
+  .screen { display:none; max-width:460px; margin:0 auto; }
+  .screen.on { display:block; }
+  .card { background:#fff; border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 4px 14px rgba(31,45,80,.08); }
+  .avatars { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .avatars button { font-size:30px; padding:10px 0; border-radius:14px; border:2px solid #dde3ec; background:#fff; cursor:pointer; }
+  .avatars button.sel { border-color:var(--accent); background:#EEEDFE; }
+  .avatars button:disabled { opacity:.35; cursor:not-allowed; }
+  input[type=text] { width:100%; font-size:18px; padding:12px; border-radius:12px; border:1px solid #c9d3e0; }
+  button.primary { width:100%; font-size:17px; padding:13px; border-radius:14px; border:none; background:var(--accent); color:#fff; font-weight:600; cursor:pointer; margin-top:10px; }
+  .meta { display:flex; justify-content:space-between; font-size:14px; color:var(--muted); margin-bottom:8px; }
+  .bar { height:8px; border-radius:6px; background:#e3e8f1; overflow:hidden; margin-bottom:12px; }
+  .bar > div { height:100%; width:100%; background:var(--accent); }
+  .prompt { font-size:30px; font-weight:800; text-align:center; margin:14px 0 18px; min-height:44px; }
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .choices button, .tiles button { font-size:17px; padding:14px 8px; border-radius:14px; border:2px solid #dde3ec; background:#fff; cursor:pointer; }
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:6px; }
+  .built { min-height:40px; text-align:center; font-size:24px; font-weight:700; margin:8px 0; letter-spacing:4px; }
+  .feedback { min-height:24px; text-align:center; font-weight:700; margin-top:10px; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  .err { color:var(--bad); font-size:14px; min-height:18px; margin-top:8px; }
+  .big { font-size:44px; font-weight:800; text-align:center; margin:8px 0; }
+  .center { text-align:center; }
+</style>
+</head>
+<body>
+
+  <!-- 1. Qo'shilish -->
+  <section class="screen on" id="sJoin">
+    <div class="card">
+      <p style="margin:0 0 10px;font-weight:700;font-size:18px;">Hayvonni tanlang</p>
+      <div class="avatars" id="avatars"></div>
+      <p style="margin:16px 0 6px;font-weight:600;">Ismingiz</p>
+      <input type="text" id="name" maxlength="12" placeholder="Masalan: Ali">
+      <button class="primary" id="joinBtn" type="button">Qo'shilish</button>
+      <p class="err" id="joinErr"></p>
+    </div>
+  </section>
+
+  <!-- 2. Kutish -->
+  <section class="screen" id="sWait">
+    <div class="card center">
+      <div class="big" id="myAvatar"></div>
+      <p style="font-size:18px;font-weight:700;margin:0;" id="myName"></p>
+      <p style="color:var(--muted);">O'qituvchi o'yinni boshlashini kuting...</p>
+    </div>
+  </section>
+
+  <!-- 3. O'yin -->
+  <section class="screen" id="sPlay">
+    <div class="meta"><span id="progress"></span><span id="scoreTxt"></span></div>
+    <div class="bar"><div id="timerBar"></div></div>
+    <div class="prompt" id="prompt"></div>
+    <div id="answerArea"></div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+  <!-- 4. Bosqich tugadi -->
+  <section class="screen" id="sStage">
+    <div class="card center">
+      <p id="stageTitle" style="font-size:20px;font-weight:700;margin:0 0 8px;"></p>
+      <div class="big" id="stageScore"></div>
+      <button class="primary" id="nextStageBtn" type="button">Keyingi bosqich</button>
+    </div>
+  </section>
+
+  <!-- 5. Yakun -->
+  <section class="screen" id="sEnd">
+    <div class="card center">
+      <p style="font-size:20px;font-weight:700;margin:0 0 8px;">O'yin tugadi</p>
+      <div class="big" id="finalScore"></div>
+      <p style="color:var(--muted);">Ballaringiz saqlandi.</p>
+    </div>
+  </section>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const CODE = params.get('room');
+  const MAX_SCORE = 100;
+  const Q_PER_STAGE = 20;
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  }
+  function err(msg) { $('joinErr').textContent = msg; }
+
+  // Yagona o'yinchi ID'si (shu xona uchun)
+  let myId = null;
+  if (CODE) {
+    myId = sessionStorage.getItem('bell_' + CODE);
+    if (!myId) {
+      myId = Math.random().toString(36).slice(2, 10);
+      sessionStorage.setItem('bell_' + CODE, myId);
+    }
+  }
+
+  let db = null, roomRef = null, room = null, picked = null;
+  let game = { started: false, stage: 0, idx: 0, qs: [], score: 0, wrong: { 1: [], 2: [] }, answered: false };
+
+  if (!CODE) {
+    show('sJoin'); err("Xona kodi yo'q. QR kodni qayta skanerlang.");
+  } else {
+    try { db = BELL.init(); }
+    catch (e) { show('sJoin'); err(e.message); }
+  }
+
+  if (db && CODE) {
+    roomRef = db.ref('rooms/' + CODE);
+    roomRef.on('value', snap => {
+      room = snap.val();
+      if (!room) { show('sJoin'); err("Bunday xona topilmadi"); return; }
+      renderAvatars();
+      const me = room.players && room.players[myId];
+      if (room.status === 'ended') { if (game.started) return; show('sJoin'); err("O'yin yakunlangan"); return; }
+      if (me && room.status === 'started' && !game.started) { startGame(); return; }
+      if (me && !game.started) { show('sWait'); $('myAvatar').textContent = me.avatar; $('myName').textContent = me.name; }
+    });
+  }
+
+  function renderAvatars() {
+    const taken = {};
+    Object.entries((room && room.players) || {}).forEach(([id, p]) => { if (id !== myId) taken[p.avatar] = true; });
+    $('avatars').innerHTML = BELL.AVATARS.map(a =>
+      `<button type="button" data-a="${a}" class="${picked === a ? 'sel' : ''}" ${taken[a] ? 'disabled' : ''}>${a}</button>`).join('');
+    $('avatars').querySelectorAll('button').forEach(b => b.onclick = () => { picked = b.dataset.a; renderAvatars(); });
+  }
+  renderAvatars();
+
+  $('joinBtn').onclick = () => {
+    if (!roomRef) return;
+    const name = $('name').value.trim();
+    if (!name) return err("Ismingizni kiriting");
+    if (!picked) return err("Hayvonni tanlang");
+    err('');
+    roomRef.child('players/' + myId).set({ name: name, avatar: picked, score: 0 });
+    roomRef.child('players/' + myId).onDisconnect().remove();
+  };
+
+  // ---------- O'yin mantig'i ----------
+  function levelCfg() { return BELL.LEVELS[(room && room.level) || 1]; }
+
+  function distractors(pool, correctStr, field, n) {
+    const src = pool.length >= n ? pool : BELL.allWords();
+    const cands = BELL.shuffle(src.filter(w => w[field] !== correctStr));
+    const out = [];
+    const seen = new Set([correctStr]);
+    for (const w of cands) { if (!seen.has(w[field])) { seen.add(w[field]); out.push(w[field]); } if (out.length === n) break; }
+    return out;
+  }
+
+  function makeStage12(stage, pool, exclude) {
+    const cfg = levelCfg();
+    const field = stage === 1 ? 'uz' : 'kor';   // javob maydoni
+    const prompt = stage === 1 ? 'kor' : 'uz';  // savol maydoni
+    const avail = BELL.shuffle(pool.filter(w => !exclude.has(w.kor)));
+    const picks = avail.slice(0, Q_PER_STAGE);
+    // yetarli bo'lmasa, qolganlarini aralashtirib to'ldirish (takrorlanishi mumkin)
+    while (picks.length < Q_PER_STAGE && pool.length) picks.push(BELL.shuffle(pool)[0]);
+    return picks.map(w => {
+      const wrong = distractors(pool, w[field], field, cfg.opts - 1);
+      const options = BELL.shuffle([w[field], ...wrong]);
+      return { type: 'choice', stage: stage, prompt: w[prompt], options: options, answer: w[field], item: w };
+    });
+  }
+
+  function makeStage3(pool) {
+    const cfg = levelCfg();
+    const wrongs = [];
+    const seen = new Set();
+    [...game.wrong[1], ...game.wrong[2]].forEach(w => { if (!seen.has(w.kor)) { seen.add(w.kor); wrongs.push(w); } });
+    const rest = BELL.shuffle(pool.filter(w => !seen.has(w.kor)));
+    const list = BELL.shuffle(wrongs).concat(rest).slice(0, Q_PER_STAGE);
+    return list.map(w => {
+      if (cfg.typed) {
+        return { type: 'typed', stage: 3, prompt: w.uz, answer: w.kor, item: w };
+      }
+      const syl = BELL.syllables(w.kor);
+      const pool2 = BELL.allWords().map(x => x.kor);
+      const extra = [];
+      BELL.shuffle(pool2).forEach(k => BELL.syllables(k).forEach(s => { if (!syl.includes(s) && !extra.includes(s)) extra.push(s); }));
+      const tiles = BELL.shuffle([...syl, ...extra.slice(0, cfg.tiles - syl.length)]);
+      return { type: 'tiles', stage: 3, prompt: w.uz, answer: w.kor, syl: syl, tiles: tiles, item: w };
+    });
+  }
+
+  function startGame() {
+    game.started = true;
+    game.score = 0;
+    const pool = BELL.pool((room && room.lessons) || []);
+    if (!pool.length) { show('sJoin'); err("Bo'limlar topilmadi"); return; }
+    game.pool = pool;
+    game.stageQs = { 1: makeStage12(1, pool, new Set()) };
+    show('sPlay');
+    runStage(1);
+  }
+
+  function runStage(stage) {
+    game.stage = stage;
+    game.idx = 0;
+    if (stage === 2) {
+      const used = new Set(game.stageQs[1].map(q => q.item.kor));
+      game.stageQs[2] = makeStage12(2, game.pool, used);
+    }
+    if (stage === 3) game.stageQs[3] = makeStage3(game.pool);
+    game.qs = game.stageQs[stage];
+    showQuestion();
+  }
+
+  function showQuestion() {
+    if (game.idx >= game.qs.length) return stageEnd();
+    const q = game.qs[game.idx];
+    game.answered = false;
+    $('progress').textContent = `${game.stage}-bosqich · ${game.idx + 1}/${game.qs.length}`;
+    $('scoreTxt').textContent = 'Ball: ' + game.score;
+    $('prompt').textContent = q.prompt;
+    $('feedback').textContent = '';
+    const area = $('answerArea');
+    area.innerHTML = '';
+
+    if (q.type === 'choice') {
+      area.innerHTML = '<div class="choices">' + q.options.map((o, i) =>
+        `<button type="button" data-i="${i}">${escapeHtml(o)}</button>`).join('') + '</div>';
+      area.querySelectorAll('button').forEach(b => b.onclick = () => {
+        answer(q.options[Number(b.dataset.i)] === q.answer, q.answer);
+      });
+    } else if (q.type === 'tiles') {
+      let chosen = [];
+      area.innerHTML = '<div class="built" id="built"></div><div class="tiles">' + q.tiles.map((t, i) =>
+        `<button type="button" data-i="${i}">${escapeHtml(t)}</button>`).join('') + '</div>' +
+        '<button class="primary" type="button" id="clearBtn" style="background:#fff;color:var(--accent);border:1px solid #c9d3e0;">Tozalash</button>';
+      area.querySelectorAll('.tiles button').forEach(b => b.onclick = () => {
+        if (game.answered || b.disabled) return;
+        chosen.push(q.tiles[Number(b.dataset.i)]);
+        b.disabled = true;
+        $('built').textContent = chosen.join('');
+        if (chosen.length === q.syl.length) answer(chosen.join('') === q.answer, q.answer);
+      });
+      $('clearBtn').onclick = () => {
+        if (game.answered) return;
+        chosen = [];
+        area.querySelectorAll('.tiles button').forEach(b => b.disabled = false);
+        $('built').textContent = '';
+      };
+    } else {
+      area.innerHTML = '<input type="text" id="typed" autocomplete="off" placeholder="Koreyscha yozing"><button class="primary" type="button" id="submitBtn">Yuborish</button>';
+      const submit = () => {
+        if (game.answered) return;
+        const v = $('typed').value.replace(/\s/g, '');
+        if (!v) return;
+        answer(v === q.answer, q.answer);
+      };
+      $('submitBtn').onclick = submit;
+      $('typed').addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      $('typed').focus();
+    }
+    startTimer((room && room.time) || 5);
+  }
+
+  let timerId = null, startedAt = 0, limitMs = 0;
+  function startTimer(sec) {
+    limitMs = sec * 1000;
+    startedAt = Date.now();
+    const bar = $('timerBar');
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      bar.style.transition = 'width ' + sec + 's linear';
+      bar.style.width = '0%';
+    }));
+    clearTimeout(timerId);
+    timerId = setTimeout(() => answer(null, null), limitMs);
+  }
+
+  function answer(isCorrect, correctStr) {
+    if (game.answered) return;
+    game.answered = true;
+    clearTimeout(timerId);
+    const q = game.qs[game.idx];
+    const elapsed = Date.now() - startedAt;
+    let pts = 0;
+    if (isCorrect) {
+      const remain = Math.max(0, limitMs - elapsed);
+      pts = Math.round(MAX_SCORE * 0.5 + MAX_SCORE * 0.5 * (remain / limitMs));
+    } else if (q && q.item && (game.stage === 1 || game.stage === 2)) {
+      game.wrong[game.stage].push(q.item);
+    }
+    game.score += pts;
+    if (roomRef) roomRef.child('players/' + myId + '/score').set(game.score);
+    $('scoreTxt').textContent = 'Ball: ' + game.score;
+
+    const fb = $('feedback');
+    if (isCorrect) { fb.className = 'feedback ok'; fb.textContent = '+' + pts; }
+    else { fb.className = 'feedback bad'; fb.textContent = correctStr ? "Noto'g'ri. To'g'ri javob: " + correctStr : "Vaqt tugadi"; }
+
+    setTimeout(() => { game.idx++; showQuestion(); }, isCorrect ? 800 : 1500);
+  }
+
+  function stageEnd() {
+    clearTimeout(timerId);
+    if (game.stage < 3) {
+      $('stageTitle').textContent = game.stage + '-bosqich yakunlandi';
+      $('stageScore').textContent = game.score;
+      show('sStage');
+      $('nextStageBtn').onclick = () => { show('sPlay'); runStage(game.stage + 1); };
+    } else {
+      $('finalScore').textContent = game.score;
+      show('sEnd');
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+</script>
+</body>
+</html>
