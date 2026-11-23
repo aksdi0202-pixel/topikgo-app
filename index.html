@@ -49,19 +49,57 @@
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
     opacity: .22;
   }
+  button.btn { width: 100%; font-family: inherit; cursor: pointer; border-style: solid; }
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; pointer-events: none;
+    transition: opacity .25s ease; z-index: 10;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; left: 0; height: 100%; width: min(86%, 380px);
+    background: var(--bg); transform: translateX(-100%); transition: transform .3s ease;
+    z-index: 11; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px;
+    box-shadow: 6px 0 24px rgba(0,0,0,.15); overflow-y: auto;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 700; font-size: 18px; }
+  .drawer-close {
+    border: none; background: var(--card); width: 36px; height: 36px; border-radius: 50%;
+    font-size: 20px; cursor: pointer; color: var(--text);
+  }
 </style>
 </head>
 <body>
   <img class="logo" src="logo.png" alt="TopikGo" width="260">
   <p class="sub">Koreys tili lug'ati</p>
   <nav class="menu">
+    <button class="btn" id="openDrawer" type="button"><span>Lug'atlar<small>TOPIK II · Essential 2000 · Hancha 2000</small></span><span class="btn-arrow">›</span></button>
+    <a class="btn" href="gaplashish.html?v=1" style="background:linear-gradient(90deg,#1e8f4e,#4cd17a);box-shadow:0 10px 0 #0e5a30;"><span>회화 · Gaplashish</span><span class="btn-arrow">›</span></a>
+  </nav>
+
+  <div class="drawer-overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer" aria-label="Lug'atlar">
+    <div class="drawer-head">
+      <span>Lug'atlar</span>
+      <button class="drawer-close" id="closeDrawer" type="button" aria-label="Yopish">×</button>
+    </div>
     <a class="btn" href="topik-sozlar.html?v=3"><span>TOPIK II · Lug'at</span><span class="btn-arrow">›</span></a>
     <a class="btn btn-yellow" href="essential.html?v=3"><span>Essential Korean Words 2000<small>Boshlang'ich · O'rta · Yuqori</small></span><span class="btn-arrow">›</span></a>
     <a class="btn" href="hancha.html?v=16" style="background:linear-gradient(90deg,#1f4e78,#3d7fb5);box-shadow:0 10px 0 #0d2a44;"><span>2000 hancha so'zlar<small>한자 어휘 2000</small></span><span class="btn-arrow">›</span></a>
-    <a class="btn" href="gaplashish.html?v=1" style="background:linear-gradient(90deg,#1e8f4e,#4cd17a);box-shadow:0 10px 0 #0e5a30;"><span>회화 · Gaplashish</span><span class="btn-arrow">›</span></a>
-  </nav>
+  </aside>
+
   <script>
     try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
+
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    function setDrawer(open) {
+      drawer.classList.toggle('open', open);
+      overlay.classList.toggle('open', open);
+    }
+    document.getElementById('openDrawer').onclick = () => setDrawer(true);
+    document.getElementById('closeDrawer').onclick = () => setDrawer(false);
+    overlay.onclick = () => setDrawer(false);
   </script>
 </body>
 </html>
