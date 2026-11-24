@@ -33,6 +33,9 @@
   .tile-blue small { color: #185FA5; }
   .tile-coral { background: #FAECE7; color: #4A1B0C; border-color: #F0997B; box-shadow: 0 6px 0 #F5C4B3; }
   .tile-coral small { color: #993C1D; }
+  .tile-wide { grid-column: 1 / -1; }
+  .sub { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .sub[hidden] { display: none !important; }
   .btn {
     position: relative; display: flex; align-items: center; justify-content: space-between;
     text-decoration: none; color: #fff; font-size: 17px; font-weight: 700; letter-spacing: .2px;
@@ -96,7 +99,11 @@
   <nav class="menu">
     <button class="tile tile-purple" id="openDrawer" type="button"><span class="t-title">Lug'atlar</span><small>Essential · Hancha</small></button>
     <a class="tile tile-green" href="gaplashish.html?v=1"><span class="t-title">Gaplashish</span><small>회화 · suhbat</small></a>
-    <a class="tile tile-blue" href="topik.html?v=1"><span class="t-title">TOPIK Test</span><small>TOPIK I va TOPIK II</small></a>
+    <button class="tile tile-blue tile-wide" id="openTopik" type="button" aria-expanded="false" aria-controls="topikSub"><span class="t-title">TOPIK Test</span><small>Daraja tanlang</small></button>
+    <div class="sub" id="topikSub" hidden>
+      <a class="tile tile-blue" href="beginner.html?v=1"><span class="t-title">TOPIK I</span><small>Boshlang'ich daraja</small></a>
+      <a class="tile tile-purple" href="beginner.html?v=1"><span class="t-title">TOPIK II</span><small>Yuqori daraja</small></a>
+    </div>
     <a class="tile tile-coral" href="#"><span class="t-title">TOPIK Darslik</span><small>1 dan 6 gacha</small></a>
   </nav>
 
@@ -171,6 +178,13 @@
       } catch (e) {}
     }
     window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
+    const openTopik = document.getElementById('openTopik');
+    const topikSub = document.getElementById('topikSub');
+    openTopik.addEventListener('click', () => {
+      const open = topikSub.hasAttribute('hidden');
+      topikSub.toggleAttribute('hidden', !open);
+      openTopik.setAttribute('aria-expanded', String(open));
+    });
     document.querySelectorAll('.btn, .tile').forEach(el => {
       el.addEventListener('click', e => {
         playPop();
