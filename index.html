@@ -36,6 +36,8 @@
   .tile-wide { grid-column: 1 / -1; }
   .sub { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .sub[hidden] { display: none !important; }
+  .sub-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .tile-level { min-height: 64px; padding: 12px 8px; font-size: 15px; }
   .btn {
     position: relative; display: flex; align-items: center; justify-content: space-between;
     text-decoration: none; color: #fff; font-size: 17px; font-weight: 700; letter-spacing: .2px;
@@ -104,7 +106,15 @@
       <a class="tile tile-blue" href="beginner.html?v=1"><span class="t-title">TOPIK I</span><small>Boshlang'ich daraja</small></a>
       <a class="tile tile-purple" href="beginner.html?v=1"><span class="t-title">TOPIK II</span><small>Yuqori daraja</small></a>
     </div>
-    <a class="tile tile-coral" href="#"><span class="t-title">TOPIK Darslik</span><small>1 dan 6 gacha</small></a>
+    <button class="tile tile-coral tile-wide" id="openDarslik" type="button" aria-expanded="false" aria-controls="darslikSub"><span class="t-title">TOPIK Darslik</span><small>1 dan 6 gacha</small></button>
+    <div class="sub sub-3" id="darslikSub" hidden>
+      <button class="tile tile-coral tile-level" type="button"><span class="t-title">1-daraja</span></button>
+      <button class="tile tile-coral tile-level" type="button"><span class="t-title">2-daraja</span></button>
+      <button class="tile tile-coral tile-level" type="button"><span class="t-title">3-daraja</span></button>
+      <button class="tile tile-coral tile-level" type="button"><span class="t-title">4-daraja</span></button>
+      <button class="tile tile-coral tile-level" type="button"><span class="t-title">5-daraja</span></button>
+      <button class="tile tile-coral tile-level" type="button"><span class="t-title">6-daraja</span></button>
+    </div>
   </nav>
 
   <div class="drawer-overlay" id="overlay"></div>
@@ -180,6 +190,13 @@
     window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
     const openTopik = document.getElementById('openTopik');
     const topikSub = document.getElementById('topikSub');
+    const openDarslik = document.getElementById('openDarslik');
+    const darslikSub = document.getElementById('darslikSub');
+    openDarslik.addEventListener('click', () => {
+      const open = darslikSub.hasAttribute('hidden');
+      darslikSub.toggleAttribute('hidden', !open);
+      openDarslik.setAttribute('aria-expanded', String(open));
+    });
     openTopik.addEventListener('click', () => {
       const open = topikSub.hasAttribute('hidden');
       topikSub.toggleAttribute('hidden', !open);
