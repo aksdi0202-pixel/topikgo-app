@@ -37,6 +37,8 @@
   .sub { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .sub[hidden] { display: none !important; }
   .sub-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .sub-1 { grid-template-columns: 1fr; }
+  #lugatSub .btn { width: 100%; margin: 0; }
   .tile-level { min-height: 64px; padding: 12px 8px; font-size: 15px; }
   .btn {
     position: relative; display: flex; align-items: center; justify-content: space-between;
@@ -99,7 +101,13 @@
   <img class="logo" src="logo.png" alt="TopikGo" width="260">
   <p class="sub">Koreys tili lug'ati</p>
   <nav class="menu">
-    <button class="tile tile-purple" id="openDrawer" type="button"><span class="t-title">Lug'atlar</span><small>Essential · Hancha</small></button>
+    <button class="tile tile-purple tile-wide" id="openDrawer" type="button" aria-expanded="false" aria-controls="lugatSub"><span class="t-title">Lug'atlar</span><small>Essential · Hancha</small></button>
+    <div class="sub sub-1" id="lugatSub" hidden>
+      <a class="btn" href="topik-sozlar.html?v=3"><span>TOPIK II · Lug'at</span><span class="btn-arrow">›</span></a>
+      <a class="btn btn-yellow" href="essential.html?v=3"><span>Essential Korean Words 2000<small>Boshlang'ich · O'rta · Yuqori</small></span><span class="btn-arrow">›</span></a>
+      <a class="btn" href="hancha.html?v=16" style="background:linear-gradient(90deg,#1f4e78,#3d7fb5);box-shadow:0 10px 0 #0d2a44;"><span>2000 hancha so'zlar<small>한자 어휘 2000</small></span><span class="btn-arrow">›</span></a>
+      <a class="btn" href="topik.html?v=1" style="background:linear-gradient(90deg,#534AB7,#7F77DD);box-shadow:0 5px 0 #26215C !important;"><span>TOPIK<small>3 daraja</small></span><span class="btn-arrow">›</span></a>
+    </div>
     <a class="tile tile-green" href="gaplashish.html?v=1"><span class="t-title">Gaplashish</span><small>회화 · suhbat</small></a>
     <button class="tile tile-blue tile-wide" id="openTopik" type="button" aria-expanded="false" aria-controls="topikSub"><span class="t-title">TOPIK Test</span><small>Daraja tanlang</small></button>
     <div class="sub" id="topikSub" hidden>
@@ -117,30 +125,10 @@
     </div>
   </nav>
 
-  <div class="drawer-overlay" id="overlay"></div>
-  <aside class="drawer" id="drawer" aria-label="Lug'atlar">
-    <div class="drawer-head">
-      <span>Lug'atlar</span>
-      <button class="drawer-close" id="closeDrawer" type="button" aria-label="Yopish">×</button>
-    </div>
-    <a class="btn" href="topik-sozlar.html?v=3"><span>TOPIK II · Lug'at</span><span class="btn-arrow">›</span></a>
-    <a class="btn btn-yellow" href="essential.html?v=3"><span>Essential Korean Words 2000<small>Boshlang'ich · O'rta · Yuqori</small></span><span class="btn-arrow">›</span></a>
-    <a class="btn" href="hancha.html?v=16" style="background:linear-gradient(90deg,#1f4e78,#3d7fb5);box-shadow:0 10px 0 #0d2a44;"><span>2000 hancha so'zlar<small>한자 어휘 2000</small></span><span class="btn-arrow">›</span></a>
-    <a class="btn" href="topik.html?v=1" style="background:linear-gradient(90deg,#534AB7,#7F77DD);box-shadow:0 5px 0 #26215C !important;"><span>TOPIK<small>3 daraja</small></span><span class="btn-arrow">›</span></a>
-  </aside>
 
   <script>
     try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
 
-    const drawer = document.getElementById('drawer');
-    const overlay = document.getElementById('overlay');
-    function setDrawer(open) {
-      drawer.classList.toggle('open', open);
-      overlay.classList.toggle('open', open);
-    }
-    document.getElementById('openDrawer').onclick = () => setDrawer(true);
-    document.getElementById('closeDrawer').onclick = () => setDrawer(false);
-    overlay.onclick = () => setDrawer(false);
   </script>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -190,6 +178,13 @@
     window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
     const openTopik = document.getElementById('openTopik');
     const topikSub = document.getElementById('topikSub');
+    const openDrawer = document.getElementById('openDrawer');
+    const lugatSub = document.getElementById('lugatSub');
+    openDrawer.addEventListener('click', () => {
+      const open = lugatSub.hasAttribute('hidden');
+      lugatSub.toggleAttribute('hidden', !open);
+      openDrawer.setAttribute('aria-expanded', String(open));
+    });
     const openDarslik = document.getElementById('openDarslik');
     const darslikSub = document.getElementById('darslikSub');
     openDarslik.addEventListener('click', () => {
