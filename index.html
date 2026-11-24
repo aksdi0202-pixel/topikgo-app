@@ -40,22 +40,29 @@
   .panel { width: 100%; max-width: 420px; }
   .panel[hidden] { display: none !important; }
   #p-lugat { display: flex; flex-direction: column; gap: 12px; }
-  .lcard { background: linear-gradient(0deg, var(--t), var(--t)), #FFFFFF; border: 1.5px solid var(--c); border-radius: 18px;
-    padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 0 14px var(--g); text-decoration: none; }
+  body { transition: background-color .3s ease; }
+  body[data-sec="mashq"], body:not([data-sec]) { --bg:#E3EFFB; --acc:#185FA5; --dark:#0C447C; --light:#B5D4F4; --tint:rgba(55,138,221,.05); --glow:rgba(55,138,221,.75); --tabbg:#D6E8F9; }
+  body[data-sec="lugat"] { --bg:#E6E4FB; --acc:#534AB7; --dark:#3C3489; --light:#CECBF6; --tint:rgba(127,119,221,.05); --glow:rgba(127,119,221,.75); --tabbg:#DAD7F8; }
+  body[data-sec="dars"] { --bg:#DDF3EA; --acc:#0F6E56; --dark:#085041; --light:#9FE1CB; --tint:rgba(29,158,117,.05); --glow:rgba(29,158,117,.75); --tabbg:#CDEEE1; }
+  body[data-sec="oyin"] { --bg:#FBEDD0; --acc:#854F0B; --dark:#633806; --light:#FAC775; --tint:rgba(239,159,39,.05); --glow:rgba(239,159,39,.75); --tabbg:#F5DFB8; }
+  body[data-sec="soz"] { --bg:#EAE9E4; --acc:#5F5E5A; --dark:#444441; --light:#D3D1C7; --tint:rgba(136,135,128,.05); --glow:rgba(136,135,128,.6); --tabbg:#DFDDD6; }
+  .lcard { background: linear-gradient(0deg, var(--tint), var(--tint)), #FFFFFF; border: 2px solid var(--acc); border-radius: 18px;
+    padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 0 0 1px var(--acc), 0 0 16px var(--glow);
+    text-decoration: none; color: inherit; transition: box-shadow .3s ease; }
   .lico { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;
-    flex: 0 0 44px; background: var(--ib); border: 1.5px solid var(--ic); box-shadow: 0 0 10px var(--g); }
+    flex: 0 0 44px; background: var(--light); border: 2px solid var(--dark); box-shadow: 0 0 12px var(--glow); }
   .ltxt { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .lt { font-size: 15px; font-weight: 500; color: var(--tt); }
-  .ls { font-size: 12px; color: var(--sc); }
-  .lar { color: var(--c); font-size: 18px; }
+  .lt { font-size: 15px; font-weight: 600; color: var(--dark); }
+  .ls { font-size: 12px; color: var(--acc); }
+  .lar { color: var(--acc); font-size: 18px; }
   .lsoon { opacity: .6; }
   .bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(5, 1fr);
-    background: #F3E4D8; padding: 8px 6px 12px; box-shadow: 0 -2px 12px rgba(42,27,18,.08); }
+    background: var(--tabbg); padding: 8px 6px 12px; box-shadow: 0 -2px 12px rgba(42,27,18,.08); transition: background-color .3s ease; }
   .tab { border: none; background: none; font: inherit; font-size: 12px; color: #6B4F3F; display: flex; flex-direction: column;
-    align-items: center; gap: 4px; cursor: pointer; padding: 0; }
-  .tab .chip { width: 44px; height: 30px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background .15s; }
-  .tab.on { color: #2A1B12; font-weight: 600; }
-  .tab.on .chip { background: #FFDDB8; }
+    align-items: center; gap: 4px; cursor: pointer; padding: 0; color: var(--acc); }
+  .tab .chip { border: 2px solid transparent; width: 44px; height: 30px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background .15s; }
+  .tab.on { color: var(--dark); font-weight: 600; }
+  .tab.on .chip { background: #FFFFFF; border-color: var(--acc); box-shadow: 0 0 14px var(--glow); }
   .tile-level { min-height: 64px; padding: 12px 8px; font-size: 15px; }
   .btn {
     position: relative; display: flex; align-items: center; justify-content: space-between;
@@ -114,7 +121,7 @@
   }
 </style>
 </head>
-<body>
+<body data-sec="mashq">
   <img class="logo" src="logo.png" alt="TopikGo" width="260">
   <p class="sub">Koreys tili lug'ati</p>
   <section class="menu panel" id="p-mashq">
@@ -131,41 +138,41 @@
     </div>
   </section>
   <section class="panel" id="p-lugat" hidden>
-    <a class="lcard" href="topik-sozlar.html?v=3" style="--c:#185FA5;--t:rgba(55,138,221,.05);--g:rgba(55,138,221,.5);--ib:#B5D4F4;--ic:#0C447C;--tt:#042C53;--sc:#185FA5;">
+    <a class="lcard" href="topik-sozlar.html?v=3">
       <span class="lico">📘</span>
       <span class="ltxt"><span class="lt">TOPIK II · Lug'at</span><span class="ls">Topik so'zlar kartochkalari</span></span>
       <span class="lar">›</span>
     </a>
-    <a class="lcard" href="essential.html?v=3" style="--c:#854F0B;--t:rgba(239,159,39,.05);--g:rgba(239,159,39,.5);--ib:#FAC775;--ic:#633806;--tt:#412402;--sc:#854F0B;">
+    <a class="lcard" href="essential.html?v=3">
       <span class="lico">📗</span>
       <span class="ltxt"><span class="lt">Essential Korean Words 2000</span><span class="ls">Boshlang'ich · O'rta · Yuqori</span></span>
       <span class="lar">›</span>
     </a>
-    <a class="lcard" href="hancha.html?v=16" style="--c:#534AB7;--t:rgba(127,119,221,.05);--g:rgba(127,119,221,.5);--ib:#CECBF6;--ic:#3C3489;--tt:#26215C;--sc:#534AB7;">
+    <a class="lcard" href="hancha.html?v=16">
       <span class="lico">漢</span>
       <span class="ltxt"><span class="lt">2000 hancha so'zlar</span><span class="ls">한자 어휘 2000</span></span>
       <span class="lar">›</span>
     </a>
-    <a class="lcard" href="topik.html?v=1" style="--c:#0F6E56;--t:rgba(29,158,117,.05);--g:rgba(29,158,117,.5);--ib:#9FE1CB;--ic:#085041;--tt:#04342C;--sc:#0F6E56;">
+    <a class="lcard" href="topik.html?v=1">
       <span class="lico">📝</span>
       <span class="ltxt"><span class="lt">TOPIK 3 daraja</span><span class="ls">O'rta daraja lug'ati</span></span>
       <span class="lar">›</span>
     </a>
   </section>
   <section class="panel" id="p-dars" hidden>
-    <a class="lcard" href="gaplashish.html?v=1" style="--c:#0F6E56;--t:rgba(29,158,117,.05);--g:rgba(29,158,117,.5);--ib:#9FE1CB;--ic:#085041;--tt:#04342C;--sc:#0F6E56;">
+    <a class="lcard" href="gaplashish.html?v=1">
       <span class="lico">💬</span>
       <span class="ltxt"><span class="lt">Gaplashish</span><span class="ls">회화 · suhbat</span></span>
       <span class="lar">›</span>
     </a>
-    <div class="lcard lsoon" style="--c:#185FA5;--t:rgba(55,138,221,.05);--g:rgba(55,138,221,.5);--ib:#B5D4F4;--ic:#0C447C;--tt:#042C53;--sc:#185FA5;">
+    <div class="lcard lsoon">
       <span class="lico">📖</span>
       <span class="ltxt"><span class="lt">Grammatika</span><span class="ls">Tez orada</span></span>
       <span class="lar">›</span>
     </div>
   </section>
   <section class="panel" id="p-oyin" hidden>
-    <a class="lcard" href="bellashuv.html?v=1" style="--c:#854F0B;--t:rgba(239,159,39,.05);--g:rgba(239,159,39,.5);--ib:#FAC775;--ic:#633806;--tt:#412402;--sc:#854F0B;">
+    <a class="lcard" href="bellashuv.html?v=1">
       <span class="lico">⚔️</span>
       <span class="ltxt"><span class="lt">Bellashuv</span><span class="ls">Ko'p o'yinchili test</span></span>
       <span class="lar">›</span>
@@ -243,6 +250,7 @@
     function showTab(name) {
       tabs.forEach(x => { const on = x.dataset.tab === name; x.classList.toggle('on', on); x.setAttribute('aria-selected', String(on)); });
       document.querySelectorAll('.panel').forEach(p => { p.hidden = p.id !== 'p-' + name; });
+      document.body.dataset.sec = name;
       try { sessionStorage.setItem('activeTab', name); } catch (e) {}
     }
     tabs.forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
