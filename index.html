@@ -170,6 +170,7 @@
         osc.stop(t0 + 0.09);
       } catch (e) {}
     }
+    window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
     document.querySelectorAll('.btn, .tile').forEach(el => {
       el.addEventListener('click', e => {
         playPop();
