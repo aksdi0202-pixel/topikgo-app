@@ -214,6 +214,17 @@
           }
         });
         setInterval(() => { myRef.set(Date.now()); }, 30000);
+
+        // Telegram foydalanuvchisi: ID, ism, username, birinchi va oxirgi kirish sanasi
+        const tgUser = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) || null;
+        if (tgUser) {
+          const uRef = db.ref('users/' + tgUser.id);
+          uRef.once('value', s => {
+            const upd = { name: tgUser.first_name || '', username: tgUser.username || '', lastSeen: Date.now() };
+            if (!s.exists()) upd.firstSeen = Date.now();
+            uRef.update(upd);
+          });
+        }
       }
     } catch (e) {}
   </script>
