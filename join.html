@@ -22,6 +22,7 @@
   .avatars button:disabled { opacity:.35; cursor:not-allowed; }
   input[type=text] { width:100%; font-size:18px; padding:12px; border-radius:12px; border:1px solid #c9d3e0; }
   button.primary { width:100%; font-size:17px; padding:13px; border-radius:14px; border:none; background:var(--accent); color:#fff; font-weight:600; cursor:pointer; margin-top:10px; }
+  button:disabled { opacity:.5; }
   .meta { display:flex; justify-content:space-between; font-size:14px; color:var(--muted); margin-bottom:8px; }
   .bar { height:8px; border-radius:6px; background:#e3e8f1; overflow:hidden; margin-bottom:12px; }
   .bar > div { height:100%; width:100%; background:var(--accent); }
@@ -35,6 +36,10 @@
   .err { color:var(--bad); font-size:14px; min-height:18px; margin-top:8px; }
   .big { font-size:44px; font-weight:800; text-align:center; margin:8px 0; }
   .center { text-align:center; }
+  .rank { font-size:16px; color:var(--muted); margin:4px 0 10px; }
+  .top { list-style:none; padding:0; margin:0; text-align:left; }
+  .top li { display:flex; justify-content:space-between; padding:8px 4px; border-bottom:1px solid #eef1f6; font-size:16px; }
+  .countdown { font-size:14px; color:var(--muted); margin-top:10px; }
 </style>
 </head>
 <body>
@@ -56,7 +61,7 @@
     <div class="card center">
       <div class="big" id="myAvatar"></div>
       <p style="font-size:18px;font-weight:700;margin:0;" id="myName"></p>
-      <p style="color:var(--muted);">O'qituvchi o'yinni boshlashini kuting...</p>
+      <p style="color:var(--muted);" id="waitMsg">O'qituvchi o'yinni boshlashini kuting...</p>
     </div>
   </section>
 
@@ -69,12 +74,14 @@
     <div class="feedback" id="feedback"></div>
   </section>
 
-  <!-- 4. Bosqich tugadi -->
+  <!-- 4. Bosqich tugadi: reyting -->
   <section class="screen" id="sStage">
     <div class="card center">
       <p id="stageTitle" style="font-size:20px;font-weight:700;margin:0 0 8px;"></p>
       <div class="big" id="stageScore"></div>
-      <button class="primary" id="nextStageBtn" type="button">Keyingi bosqich</button>
+      <p class="rank" id="stageRank"></p>
+      <ul class="top" id="stageTop"></ul>
+      <p class="countdown" id="breakLeft"></p>
     </div>
   </section>
 
@@ -83,6 +90,8 @@
     <div class="card center">
       <p style="font-size:20px;font-weight:700;margin:0 0 8px;">O'yin tugadi</p>
       <div class="big" id="finalScore"></div>
+      <p class="rank" id="finalRank"></p>
+      <ul class="top" id="finalTop"></ul>
       <p style="color:var(--muted);">Ballaringiz saqlandi.</p>
     </div>
   </section>
@@ -93,11 +102,20 @@
   const CODE = params.get('room');
   const MAX_SCORE = 100;
   const Q_PER_STAGE = 20;
+  const GAP_MS = 1500;     // javobdan keyin to'g'ri javob ko'rsatiladigan vaqt
+  const BREAK_MS = 12000;  // bosqich oralig'idagi reyting vaqti
 
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
   }
   function err(msg) { $('joinErr').textContent = msg; }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  // Server vaqti (hamma o'yinchida bir xil vaqt hisobi uchun)
+  let serverOffset = 0;
+  const serverNow = () => Date.now() + serverOffset;
 
   // Yagona o'yinchi ID'si (shu xona uchun)
   let myId = null;
@@ -110,7 +128,7 @@
   }
 
   let db = null, roomRef = null, room = null, picked = null;
-  let game = { started: false, stage: 0, idx: 0, qs: [], score: 0, wrong: { 1: [], 2: [] }, answered: false };
+  let game = { started: false, finished: false, score: 0, qKey: null, bKey: null, answered: {}, handled: {}, ticker: null };
 
   if (!CODE) {
     show('sJoin'); err("Xona kodi yo'q. QR kodni qayta skanerlang.");
@@ -120,14 +138,18 @@
   }
 
   if (db && CODE) {
+    db.ref('.info/serverTimeOffset').on('value', s => { serverOffset = s.val() || 0; });
     roomRef = db.ref('rooms/' + CODE);
     roomRef.on('value', snap => {
       room = snap.val();
       if (!room) { show('sJoin'); err("Bunday xona topilmadi"); return; }
       renderAvatars();
       const me = room.players && room.players[myId];
-      if (room.status === 'ended') { if (game.started) return; show('sJoin'); err("O'yin yakunlangan"); return; }
-      if (me && room.status === 'started' && !game.started) { startGame(); return; }
+      if (room.status === 'ended') {
+        if (game.started) { finishGame(); return; }
+        show('sJoin'); err("O'yin yakunlangan"); return;
+      }
+      if (me && room.status === 'started' && room.game && !game.started) { startGame(); return; }
       if (me && !game.started) { show('sWait'); $('myAvatar').textContent = me.avatar; $('myName').textContent = me.name; }
     });
   }
@@ -151,84 +173,95 @@
     roomRef.child('players/' + myId).onDisconnect().remove();
   };
 
-  // ---------- O'yin mantig'i ----------
-  function levelCfg() { return BELL.LEVELS[(room && room.level) || 1]; }
-
-  function distractors(pool, correctStr, field, n) {
-    const src = pool.length >= n ? pool : BELL.allWords();
-    const cands = BELL.shuffle(src.filter(w => w[field] !== correctStr));
-    const out = [];
-    const seen = new Set([correctStr]);
-    for (const w of cands) { if (!seen.has(w[field])) { seen.add(w[field]); out.push(w[field]); } if (out.length === n) break; }
-    return out;
+  // ---------- Vaqt jadvali (hamma uchun bir xil) ----------
+  // Bosqich: 20 savol, har savol T soniya javob + GAP_MS to'g'ri javob.
+  // Bosqichlar orasida BREAK_MS reyting. 3-bosqich tugagach final.
+  function timeline(now) {
+    const T = (room.time || 5) * 1000;
+    const SLOT = T + GAP_MS;
+    const STAGE_LEN = Q_PER_STAGE * SLOT;
+    const PERIOD = STAGE_LEN + BREAK_MS;
+    const t = now - room.game.s1;
+    if (t < 0) return { phase: 'lead', left: -t };
+    const stage = Math.floor(t / PERIOD) + 1;
+    if (stage > 3) return { phase: 'end' };
+    const w = t - (stage - 1) * PERIOD;
+    if (w >= STAGE_LEN) {
+      if (stage === 3) return { phase: 'end' };
+      return { phase: 'break', stage: stage, left: PERIOD - w };
+    }
+    const idx = Math.floor(w / SLOT);
+    const r = w - idx * SLOT;
+    if (r < T) return { phase: 'ask', stage: stage, idx: idx, remain: T - r };
+    return { phase: 'reveal', stage: stage, idx: idx };
   }
 
-  function makeStage12(stage, pool, exclude) {
-    const cfg = levelCfg();
-    const field = stage === 1 ? 'uz' : 'kor';   // javob maydoni
-    const prompt = stage === 1 ? 'kor' : 'uz';  // savol maydoni
-    const avail = BELL.shuffle(pool.filter(w => !exclude.has(w.kor)));
-    const picks = avail.slice(0, Q_PER_STAGE);
-    // yetarli bo'lmasa, qolganlarini aralashtirib to'ldirish (takrorlanishi mumkin)
-    while (picks.length < Q_PER_STAGE && pool.length) picks.push(BELL.shuffle(pool)[0]);
-    return picks.map(w => {
-      const wrong = distractors(pool, w[field], field, cfg.opts - 1);
-      const options = BELL.shuffle([w[field], ...wrong]);
-      return { type: 'choice', stage: stage, prompt: w[prompt], options: options, answer: w[field], item: w };
-    });
-  }
-
-  function makeStage3(pool) {
-    const cfg = levelCfg();
-    const wrongs = [];
-    const seen = new Set();
-    [...game.wrong[1], ...game.wrong[2]].forEach(w => { if (!seen.has(w.kor)) { seen.add(w.kor); wrongs.push(w); } });
-    const rest = BELL.shuffle(pool.filter(w => !seen.has(w.kor)));
-    const list = BELL.shuffle(wrongs).concat(rest).slice(0, Q_PER_STAGE);
-    return list.map(w => {
-      if (cfg.typed) {
-        return { type: 'typed', stage: 3, prompt: w.uz, answer: w.kor, item: w };
-      }
-      const syl = BELL.syllables(w.kor);
-      const pool2 = BELL.allWords().map(x => x.kor);
-      const extra = [];
-      BELL.shuffle(pool2).forEach(k => BELL.syllables(k).forEach(s => { if (!syl.includes(s) && !extra.includes(s)) extra.push(s); }));
-      const tiles = BELL.shuffle([...syl, ...extra.slice(0, cfg.tiles - syl.length)]);
-      return { type: 'tiles', stage: 3, prompt: w.uz, answer: w.kor, syl: syl, tiles: tiles, item: w };
-    });
-  }
-
+  // ---------- O'yin ----------
   function startGame() {
     game.started = true;
-    game.score = 0;
-    const pool = BELL.pool((room && room.lessons) || []);
-    if (!pool.length) { show('sJoin'); err("Bo'limlar topilmadi"); return; }
-    game.pool = pool;
-    game.stageQs = { 1: makeStage12(1, pool, new Set()) };
-    show('sPlay');
-    runStage(1);
+    game.ticker = setInterval(tick, 200);
+    tick();
   }
 
-  function runStage(stage) {
-    game.stage = stage;
-    game.idx = 0;
-    if (stage === 2) {
-      const used = new Set(game.stageQs[1].map(q => q.item.kor));
-      game.stageQs[2] = makeStage12(2, game.pool, used);
+  function tick() {
+    if (!room || !room.game || game.finished) return;
+    const st = timeline(serverNow());
+
+    if (st.phase === 'lead') {
+      show('sWait');
+      $('waitMsg').textContent = "Boshlanishiga " + Math.ceil(st.left / 1000) + " soniya...";
+      return;
     }
-    if (stage === 3) game.stageQs[3] = makeStage3(game.pool);
-    game.qs = game.stageQs[stage];
-    showQuestion();
+    if (st.phase === 'end') { finishGame(); return; }
+    if (st.phase === 'break') {
+      if (game.bKey !== st.stage) { game.bKey = st.stage; renderBreak(st.stage); }
+      $('breakLeft').textContent = "Keyingi bosqich: " + Math.ceil(st.left / 1000) + " soniya";
+      return;
+    }
+
+    const qKey = st.stage + '-' + st.idx;
+    const qs = room.game['qs' + st.stage];
+    const q = qs && qs[st.idx];
+    if (!q) {
+      // 3-bosqich savollari hali o'qituvchidan kelmagan
+      show('sPlay');
+      $('prompt').textContent = "Savollar tayyorlanmoqda...";
+      $('answerArea').innerHTML = '';
+      game.qKey = null;
+      return;
+    }
+    if (game.qKey !== qKey) { game.qKey = qKey; renderQuestion(q, st.stage, st.idx); }
+
+    const bar = $('timerBar');
+    if (st.phase === 'ask') {
+      bar.style.transition = 'width .2s linear';
+      bar.style.width = (st.remain / ((room.time || 5) * 1000) * 100) + '%';
+    } else {
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      if (!game.handled[qKey]) {
+        game.handled[qKey] = true;
+        if (!game.answered[qKey]) {
+          game.answered[qKey] = true;
+          recordAnswer(st.stage, st.idx, false);
+          disableArea();
+          $('feedback').className = 'feedback bad';
+          $('feedback').textContent = "Vaqt tugadi. To'g'ri javob: " + q.answer;
+        }
+      }
+    }
+    $('scoreTxt').textContent = 'Ball: ' + game.score;
   }
 
-  function showQuestion() {
-    if (game.idx >= game.qs.length) return stageEnd();
-    const q = game.qs[game.idx];
-    game.answered = false;
-    $('progress').textContent = `${game.stage}-bosqich · ${game.idx + 1}/${game.qs.length}`;
+  function renderQuestion(q, stage, idx) {
+    show('sPlay');
+    $('progress').textContent = stage + '-bosqich · ' + (idx + 1) + '/' + Q_PER_STAGE;
     $('scoreTxt').textContent = 'Ball: ' + game.score;
     $('prompt').textContent = q.prompt;
+    $('feedback').className = 'feedback';
     $('feedback').textContent = '';
+    $('timerBar').style.transition = 'none';
+    $('timerBar').style.width = '100%';
     const area = $('answerArea');
     area.innerHTML = '';
 
@@ -244,14 +277,13 @@
         `<button type="button" data-i="${i}">${escapeHtml(t)}</button>`).join('') + '</div>' +
         '<button class="primary" type="button" id="clearBtn" style="background:#fff;color:var(--accent);border:1px solid #c9d3e0;">Tozalash</button>';
       area.querySelectorAll('.tiles button').forEach(b => b.onclick = () => {
-        if (game.answered || b.disabled) return;
+        if (b.disabled) return;
         chosen.push(q.tiles[Number(b.dataset.i)]);
         b.disabled = true;
         $('built').textContent = chosen.join('');
         if (chosen.length === q.syl.length) answer(chosen.join('') === q.answer, q.answer);
       });
       $('clearBtn').onclick = () => {
-        if (game.answered) return;
         chosen = [];
         area.querySelectorAll('.tiles button').forEach(b => b.disabled = false);
         $('built').textContent = '';
@@ -259,7 +291,6 @@
     } else {
       area.innerHTML = '<input type="text" id="typed" autocomplete="off" placeholder="Koreyscha yozing"><button class="primary" type="button" id="submitBtn">Yuborish</button>';
       const submit = () => {
-        if (game.answered) return;
         const v = $('typed').value.replace(/\s/g, '');
         if (!v) return;
         answer(v === q.answer, q.answer);
@@ -268,63 +299,75 @@
       $('typed').addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
       $('typed').focus();
     }
-    startTimer((room && room.time) || 5);
   }
 
-  let timerId = null, startedAt = 0, limitMs = 0;
-  function startTimer(sec) {
-    limitMs = sec * 1000;
-    startedAt = Date.now();
-    const bar = $('timerBar');
-    bar.style.transition = 'none';
-    bar.style.width = '100%';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      bar.style.transition = 'width ' + sec + 's linear';
-      bar.style.width = '0%';
-    }));
-    clearTimeout(timerId);
-    timerId = setTimeout(() => answer(null, null), limitMs);
+  function disableArea() {
+    document.querySelectorAll('#answerArea button, #answerArea input').forEach(e => e.disabled = true);
   }
 
+  // Javob: birinchi bosgan ko'proq ball oladi (vaqt server vaqti bo'yicha hisoblanadi)
   function answer(isCorrect, correctStr) {
-    if (game.answered) return;
-    game.answered = true;
-    clearTimeout(timerId);
-    const q = game.qs[game.idx];
-    const elapsed = Date.now() - startedAt;
+    const st = timeline(serverNow());
+    const qKey = st.stage + '-' + st.idx;
+    if (st.phase !== 'ask' || qKey !== game.qKey || game.answered[qKey]) return;
+    game.answered[qKey] = true;
+    disableArea();
+
     let pts = 0;
-    if (isCorrect) {
-      const remain = Math.max(0, limitMs - elapsed);
-      pts = Math.round(MAX_SCORE * 0.5 + MAX_SCORE * 0.5 * (remain / limitMs));
-    } else if (q && q.item && (game.stage === 1 || game.stage === 2)) {
-      game.wrong[game.stage].push(q.item);
-    }
+    if (isCorrect) pts = Math.round(MAX_SCORE * 0.5 + MAX_SCORE * 0.5 * (st.remain / ((room.time || 5) * 1000)));
     game.score += pts;
     if (roomRef) roomRef.child('players/' + myId + '/score').set(game.score);
-    $('scoreTxt').textContent = 'Ball: ' + game.score;
+    recordAnswer(st.stage, st.idx, !!isCorrect);
 
     const fb = $('feedback');
     if (isCorrect) { fb.className = 'feedback ok'; fb.textContent = '+' + pts; }
-    else { fb.className = 'feedback bad'; fb.textContent = correctStr ? "Noto'g'ri. To'g'ri javob: " + correctStr : "Vaqt tugadi"; }
-
-    setTimeout(() => { game.idx++; showQuestion(); }, isCorrect ? 800 : 1500);
+    else { fb.className = 'feedback bad'; fb.textContent = "Noto'g'ri. To'g'ri javob: " + correctStr; }
+    $('scoreTxt').textContent = 'Ball: ' + game.score;
   }
 
-  function stageEnd() {
-    clearTimeout(timerId);
-    if (game.stage < 3) {
-      $('stageTitle').textContent = game.stage + '-bosqich yakunlandi';
-      $('stageScore').textContent = game.score;
-      show('sStage');
-      $('nextStageBtn').onclick = () => { show('sPlay'); runStage(game.stage + 1); };
-    } else {
-      $('finalScore').textContent = game.score;
-      show('sEnd');
-    }
+  // Har bir savol bo'yicha javob (o'qituvchi 3-bosqich savollarini shu asosda tuzadi)
+  function recordAnswer(stage, idx, ok) {
+    if (roomRef) roomRef.child('answers/s' + stage + '_' + idx + '/' + myId).set(ok);
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  // ---------- Reyting ----------
+  function ranking() {
+    const list = Object.entries((room && room.players) || {}).map(([id, p]) => ({
+      id: id, name: p.name || '', avatar: p.avatar || '', score: p.score || 0 }));
+    list.sort((a, b) => b.score - a.score);
+    return list;
+  }
+  function rankInfo() {
+    const list = ranking();
+    const i = list.findIndex(p => p.id === myId);
+    return { rank: i + 1, total: list.length, list: list };
+  }
+  function rankText(info) {
+    return info.rank ? "Siz " + info.rank + "-o'rindasiz (jami " + info.total + ")" : '';
+  }
+  function topHtml(list) {
+    return list.slice(0, 5).map((p, i) =>
+      `<li><span>${i + 1}. ${p.avatar} ${escapeHtml(p.name)}</span><strong>${p.score}</strong></li>`).join('');
+  }
+
+  function renderBreak(stage) {
+    show('sStage');
+    const info = rankInfo();
+    $('stageTitle').textContent = stage + '-bosqich yakunlandi';
+    $('stageScore').textContent = game.score;
+    $('stageRank').textContent = rankText(info);
+    $('stageTop').innerHTML = topHtml(info.list);
+  }
+
+  function finishGame() {
+    if (game.finished) return;
+    game.finished = true;
+    clearInterval(game.ticker);
+    show('sEnd');
+    const info = rankInfo();
+    $('finalScore').textContent = game.score;
+    $('finalRank').textContent = rankText(info);
+    $('finalTop').innerHTML = topHtml(info.list);
   }
 </script>
 </body>
