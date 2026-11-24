@@ -48,11 +48,12 @@
   .lt { font-size: 15px; font-weight: 500; color: var(--tt); }
   .ls { font-size: 12px; color: var(--sc); }
   .lar { color: var(--c); font-size: 18px; }
-  .bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(4, 1fr);
+  .lsoon { opacity: .6; }
+  .bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(5, 1fr);
     background: #F3E4D8; padding: 8px 6px 12px; box-shadow: 0 -2px 12px rgba(42,27,18,.08); }
   .tab { border: none; background: none; font: inherit; font-size: 12px; color: #6B4F3F; display: flex; flex-direction: column;
     align-items: center; gap: 4px; cursor: pointer; padding: 0; }
-  .tab .chip { width: 52px; height: 30px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background .15s; }
+  .tab .chip { width: 44px; height: 30px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background .15s; }
   .tab.on { color: #2A1B12; font-weight: 600; }
   .tab.on .chip { background: #FFDDB8; }
   .tile-level { min-height: 64px; padding: 12px 8px; font-size: 15px; }
@@ -151,12 +152,31 @@
       <span class="lar">›</span>
     </a>
   </section>
-  <section class="panel" id="p-gap" hidden></section>
+  <section class="panel" id="p-dars" hidden>
+    <a class="lcard" href="gaplashish.html?v=1" style="--c:#0F6E56;--t:rgba(29,158,117,.05);--g:rgba(29,158,117,.5);--ib:#9FE1CB;--ic:#085041;--tt:#04342C;--sc:#0F6E56;">
+      <span class="lico">💬</span>
+      <span class="ltxt"><span class="lt">Gaplashish</span><span class="ls">회화 · suhbat</span></span>
+      <span class="lar">›</span>
+    </a>
+    <div class="lcard lsoon" style="--c:#185FA5;--t:rgba(55,138,221,.05);--g:rgba(55,138,221,.5);--ib:#B5D4F4;--ic:#0C447C;--tt:#042C53;--sc:#185FA5;">
+      <span class="lico">📖</span>
+      <span class="ltxt"><span class="lt">Grammatika</span><span class="ls">Tez orada</span></span>
+      <span class="lar">›</span>
+    </div>
+  </section>
+  <section class="panel" id="p-oyin" hidden>
+    <a class="lcard" href="bellashuv.html?v=1" style="--c:#854F0B;--t:rgba(239,159,39,.05);--g:rgba(239,159,39,.5);--ib:#FAC775;--ic:#633806;--tt:#412402;--sc:#854F0B;">
+      <span class="lico">⚔️</span>
+      <span class="ltxt"><span class="lt">Bellashuv</span><span class="ls">Ko'p o'yinchili test</span></span>
+      <span class="lar">›</span>
+    </a>
+  </section>
   <section class="panel" id="p-soz" hidden></section>
   <nav class="bottom" aria-label="Asosiy bo'limlar">
     <button class="tab on" data-tab="mashq" type="button" aria-selected="true"><span class="chip">🏠</span><span>Mashq</span></button>
     <button class="tab" data-tab="lugat" type="button" aria-selected="false"><span class="chip">📚</span><span>Lug'atlar</span></button>
-    <button class="tab" data-tab="gap" type="button" aria-selected="false"><span class="chip">💬</span><span>Gaplashish</span></button>
+    <button class="tab" data-tab="dars" type="button" aria-selected="false"><span class="chip">📖</span><span>Darsliklar</span></button>
+    <button class="tab" data-tab="oyin" type="button" aria-selected="false"><span class="chip">🎮</span><span>O'yinlar</span></button>
     <button class="tab" data-tab="soz" type="button" aria-selected="false"><span class="chip">⚙️</span><span>Sozlamalar</span></button>
   </nav>
 
