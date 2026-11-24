@@ -22,32 +22,21 @@
   h1 { margin: 0; font-size: 18px; font-weight: 800; color: #142a5a; }
   p.sub { margin: 0 0 24px; color: var(--muted); font-size: 14px; width: 100%; max-width: 420px; }
   .levels { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  /* LED-style level cards: Uzbek name on top, Korean below; colour set per level */
   .lvl {
-    position: relative; width: 260px; height: 124px; border-radius: 28px;
+    position: relative; width: 260px; height: 124px; border-radius: 20px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-    text-decoration: none; font-weight: 800; overflow: hidden;
-    border: 2px solid rgba(150,235,255,.9); transition: transform .12s ease, box-shadow .12s ease;
+    text-decoration: none; background: linear-gradient(180deg, #fff, var(--tint));
+    border: 2px solid var(--acc);
+    box-shadow: 0 0 0 1px var(--acc), 0 0 16px var(--glow);
+    transition: transform .12s ease, box-shadow .12s ease;
   }
-  .lvl::before {
-    content: ""; position: absolute; left: 14px; right: 14px; top: 6px; height: 46%;
-    border-radius: 22px; background: linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,.05));
-    pointer-events: none;
-  }
-  .lvl-name { position: relative; font-size: 20px; }
-  .lvl-kor { position: relative; font-size: 30px; }
-  .lvl:active { transform: translateY(6px); }
-  .lvl-1 {
-    background: linear-gradient(160deg, #f2b705, #ffd21f); color: #2b1d00;
-    box-shadow: 0 10px 0 #8a6200, 0 0 18px rgba(255,200,0,.55); border-color: rgba(255,240,170,.95);
-  }
-  .lvl-2 {
-    background: linear-gradient(160deg, #22a050, #78dc8c); color: #fff;
-    box-shadow: 0 10px 0 #0e5a2c, 0 0 18px rgba(40,200,100,.5);
-  }
-  .lvl-3 {
-    background: linear-gradient(160deg, #141e5a, #3c50aa); color: #fff;
-    box-shadow: 0 10px 0 #070d2e, 0 0 18px rgba(60,80,170,.55);
-  }
+  .lvl-name { font-size: 20px; font-weight: 800; color: var(--dark); }
+  .lvl-kor { font-size: 28px; font-weight: 800; color: var(--acc); }
+  .lvl:active { transform: translateY(4px); }
+  .lvl-1 { --acc:#22a050; --dark:#0e5a2c; --tint:#eaf9ef; --glow:rgba(40,200,100,.45); }
+  .lvl-2 { --acc:#2f6fd6; --dark:#143f86; --tint:#eaf2fd; --glow:rgba(47,111,214,.45); }
+  .lvl-3 { --acc:#534AB7; --dark:#2d2870; --tint:#efeefc; --glow:rgba(83,74,183,.45); }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
@@ -62,7 +51,7 @@
   </header>
   <p class="sub">Darajani tanlang</p>
   <nav class="levels">
-    <a class="lvl lvl-1" href="beginner.html?v=1"><span class="lvl-name">Boshlang'ich</span><span class="lvl-kor">초급</span></a>
+    <a class="lvl lvl-1" href="boshlangich.html?v=1"><span class="lvl-name">Boshlang'ich</span><span class="lvl-kor">초급</span></a>
     <a class="lvl lvl-2" href="orta.html?v=1"><span class="lvl-name">O'rta</span><span class="lvl-kor">중급</span></a>
     <a class="lvl lvl-3" href="#"><span class="lvl-name">Yuqori</span><span class="lvl-kor">고급</span></a>
   </nav>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boshlang'ich · Essential Korean Words 2000</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+  :root { --bg:#f4f7fb; --text:#1d2433; --muted:#6b7385; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center;
+    padding: 16px 16px 32px;
+  }
+  .bar {
+    width: 100%; max-width: 420px; display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 24px; margin-bottom: 12px;
+    background: linear-gradient(90deg, rgba(120,220,140,.72), rgba(40,160,80,.72));
+    border: 2px solid rgba(255,255,255,.8);
+    box-shadow: 0 8px 20px rgba(40,160,80,.25), inset 0 1px 0 rgba(255,255,255,.7);
+    backdrop-filter: blur(6px);
+  }
+  .back {
+    text-decoration: none; color: #1f7a3c; font-size: 26px; font-weight: 700; line-height: 1;
+    width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #e6f8ea;
+    border: 2px solid #9be3ad;
+  }
+  h1 { margin: 0; font-size: 18px; font-weight: 800; color: #0a3519; }
+  h1 small { display: block; font-size: 13px; font-weight: 600; color: #1f5a33; margin-top: 2px; }
+  p.sub { margin: 0 0 20px; color: var(--muted); font-size: 14px; width: 100%; max-width: 420px; }
+  .grid {
+    width: 100%; max-width: 420px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  /* Rotating LED halo: a conic-gradient ring spins behind each card */
+  .qism {
+    position: relative; border-radius: 20px; padding: 3px; text-decoration: none; color: var(--text);
+    background: conic-gradient(from var(--a), #ff3b6b, #ffb020, #ffe600, #39e07a, #20c8ff, #5b5bff, #d43bff, #ff3b6b);
+    animation: spin 4s linear infinite;
+    animation-delay: var(--d, 0s);
+    box-shadow: 0 0 14px rgba(255,190,60,.35);
+  }
+  @keyframes spin { to { --a: 360deg; } }
+  .qism-in {
+    background: #fff; border-radius: 17px; padding: 20px 18px; height: 100%;
+    display: flex; flex-direction: column; justify-content: space-between; min-height: 110px;
+  }
+  .qism-title { font-size: 24px; font-weight: 800; color: #1d2433; }
+  .qism-meta { font-size: 15px; color: var(--muted); margin-top: 10px; }
+  .qism:active { transform: translateY(3px); }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: url('bg-logo.png') no-repeat center 55% / min(88%, 520px) auto;
+    opacity: .22;
+  }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <a class="back" href="essential.html" aria-label="Orqaga">‹</a>
+    <h1>Boshlang'ich · 초급<small>65 dars · 6 kun</small></h1>
+  </div>
+  <p class="sub">Essential Korean Words 2000 · Kunlar</p>
+  <nav class="grid">
+    <a class="qism" href="bolim.html?level=b&q=1&v=1" style="--d:-0s"><div class="qism-in"><span class="qism-title">1-kun</span><span class="qism-meta">11 dars</span></div></a>
+    <a class="qism" href="bolim.html?level=b&q=2&v=1" style="--d:-0.6s"><div class="qism-in"><span class="qism-title">2-kun</span><span class="qism-meta">11 dars</span></div></a>
+    <a class="qism" href="bolim.html?level=b&q=3&v=1" style="--d:-1.2s"><div class="qism-in"><span class="qism-title">3-kun</span><span class="qism-meta">11 dars</span></div></a>
+    <a class="qism" href="bolim.html?level=b&q=4&v=1" style="--d:-1.8s"><div class="qism-in"><span class="qism-title">4-kun</span><span class="qism-meta">11 dars</span></div></a>
+    <a class="qism" href="bolim.html?level=b&q=5&v=1" style="--d:-2.4s"><div class="qism-in"><span class="qism-title">5-kun</span><span class="qism-meta">11 dars</span></div></a>
+    <a class="qism" href="bolim.html?level=b&q=6&v=1" style="--d:-3s"><div class="qism-in"><span class="qism-title">6-kun</span><span class="qism-meta">10 dars</span></div></a>
+  </nav>
+  <script>
+    try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
+  </script>
+</body>
+</html>
