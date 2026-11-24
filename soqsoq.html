@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쏙쏙 TOPIK</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { --c:#534AB7; --d:#3C3489; --l:#CECBF6; --t:rgba(127,119,221,.05); --g:rgba(127,119,221,.75); }
+  body { margin:0; min-height:100vh; background:#E6E4FB; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:#1d2433;
+    padding:16px 16px 40px; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; }
+  .wrap { width:100%; max-width:420px; }
+  .back { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%;
+    background:#fff; color:#1d2433; text-decoration:none; font-size:20px; }
+  .kicker { font-size:12px; color:var(--c); margin:14px 0 0; }
+  h1 { font-size:22px; font-weight:600; color:var(--d); margin:4px 0 14px; }
+  .card { background:linear-gradient(0deg,var(--t),var(--t)),#fff; border:2px solid var(--c); border-radius:18px; padding:14px;
+    display:flex; align-items:center; gap:12px; box-shadow:0 0 0 1px var(--c),0 0 16px var(--g); text-decoration:none; color:inherit; margin-bottom:12px; }
+  .ico { width:44px; height:44px; border-radius:50%; background:var(--l); border:2px solid var(--d); box-shadow:0 0 12px var(--g);
+    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600; color:var(--d); flex:0 0 44px; }
+  .txt { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .t1 { font-size:15px; font-weight:600; color:var(--d); }
+  .t2 { font-size:12px; color:var(--c); }
+  .ar { color:var(--c); font-size:18px; }
+  .soon { opacity:.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html?v=2" aria-label="Orqaga">‹</a>
+  <p class="kicker">쏙쏙 TOPIK</p>
+  <h1>Daraja tanlang</h1>
+
+  <a class="card" href="topik-sozlar.html?v=3">
+    <span class="ico">초</span>
+    <span class="txt"><span class="t1">Boshlang'ich · TOPIK 1–2</span><span class="t2">쏙쏙 초급</span></span>
+    <span class="ar">›</span>
+  </a>
+  <div class="card soon">
+    <span class="ico">중</span>
+    <span class="txt"><span class="t1">O'rta · TOPIK 3–4</span><span class="t2">쏙쏙 중급 · tez orada</span></span>
+    <span class="ar">›</span>
+  </div>
+  <div class="card soon">
+    <span class="ico">고</span>
+    <span class="txt"><span class="t1">Yuqori · TOPIK 5–6</span><span class="t2">쏙쏙 고급 · tez orada</span></span>
+    <span class="ar">›</span>
+  </div>
+</div>
+<script>
+  try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
+  document.querySelectorAll('.soon').forEach(el => el.addEventListener('click', e => e.preventDefault()));
+</script>
+</body>
+</html>
