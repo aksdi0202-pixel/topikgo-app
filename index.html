@@ -11,7 +11,7 @@
   body {
     margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center;
-    padding: 8px 16px 24px;
+    padding: 8px 16px 110px;
   }
   .logo { display: block; width: 190px; max-width: 70%; height: auto; margin: 0 auto 0; }
   p.sub { margin: -10px 0 24px; color: var(--muted); font-size: 14px; }
@@ -37,8 +37,17 @@
   .sub { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .sub[hidden] { display: none !important; }
   .sub-3 { grid-template-columns: 1fr 1fr 1fr; }
-  .sub-1 { grid-template-columns: 1fr; }
-  #lugatSub .btn { width: 100%; margin: 0; }
+  .panel { width: 100%; max-width: 420px; }
+  .panel[hidden] { display: none !important; }
+  #p-lugat { display: flex; flex-direction: column; gap: 12px; }
+  #p-lugat .btn { width: 100%; margin: 0; }
+  .bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(4, 1fr);
+    background: #F3E4D8; padding: 8px 6px 12px; box-shadow: 0 -2px 12px rgba(42,27,18,.08); }
+  .tab { border: none; background: none; font: inherit; font-size: 12px; color: #6B4F3F; display: flex; flex-direction: column;
+    align-items: center; gap: 4px; cursor: pointer; padding: 0; }
+  .tab .chip { width: 52px; height: 30px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background .15s; }
+  .tab.on { color: #2A1B12; font-weight: 600; }
+  .tab.on .chip { background: #FFDDB8; }
   .tile-level { min-height: 64px; padding: 12px 8px; font-size: 15px; }
   .btn {
     position: relative; display: flex; align-items: center; justify-content: space-between;
@@ -100,21 +109,10 @@
 <body>
   <img class="logo" src="logo.png" alt="TopikGo" width="260">
   <p class="sub">Koreys tili lug'ati</p>
-  <nav class="menu">
-    <button class="tile tile-purple tile-wide" id="openDrawer" type="button" aria-expanded="false" aria-controls="lugatSub"><span class="t-title">Lug'atlar</span><small>Essential · Hancha</small></button>
-    <div class="sub sub-1" id="lugatSub" hidden>
-      <a class="btn" href="topik-sozlar.html?v=3"><span>TOPIK II · Lug'at</span><span class="btn-arrow">›</span></a>
-      <a class="btn btn-yellow" href="essential.html?v=3"><span>Essential Korean Words 2000<small>Boshlang'ich · O'rta · Yuqori</small></span><span class="btn-arrow">›</span></a>
-      <a class="btn" href="hancha.html?v=16" style="background:linear-gradient(90deg,#1f4e78,#3d7fb5);box-shadow:0 10px 0 #0d2a44;"><span>2000 hancha so'zlar<small>한자 어휘 2000</small></span><span class="btn-arrow">›</span></a>
-      <a class="btn" href="topik.html?v=1" style="background:linear-gradient(90deg,#534AB7,#7F77DD);box-shadow:0 5px 0 #26215C !important;"><span>TOPIK<small>3 daraja</small></span><span class="btn-arrow">›</span></a>
-    </div>
-    <a class="tile tile-green" href="gaplashish.html?v=1"><span class="t-title">Gaplashish</span><small>회화 · suhbat</small></a>
-    <button class="tile tile-blue tile-wide" id="openTopik" type="button" aria-expanded="false" aria-controls="topikSub"><span class="t-title">TOPIK Test</span><small>Daraja tanlang</small></button>
-    <div class="sub" id="topikSub" hidden>
-      <a class="tile tile-blue" href="beginner.html?v=1"><span class="t-title">TOPIK I</span><small>Boshlang'ich daraja</small></a>
-      <a class="tile tile-purple" href="beginner.html?v=1"><span class="t-title">TOPIK II</span><small>Yuqori daraja</small></a>
-    </div>
-    <button class="tile tile-coral tile-wide" id="openDarslik" type="button" aria-expanded="false" aria-controls="darslikSub"><span class="t-title">TOPIK Darslik</span><small>1 dan 6 gacha</small></button>
+  <section class="menu panel" id="p-mashq">
+    <a class="tile tile-blue" href="beginner.html?v=1"><span class="t-title">TOPIK I</span><small>1–2-daraja</small></a>
+    <a class="tile tile-purple" href="beginner.html?v=1"><span class="t-title">TOPIK II</span><small>3–6-daraja</small></a>
+    <button class="tile tile-coral tile-wide" data-toggle="darslikSub" type="button" aria-expanded="false" aria-controls="darslikSub"><span class="t-title">TOPIK Darslik</span><small>1 dan 6 gacha</small></button>
     <div class="sub sub-3" id="darslikSub" hidden>
       <button class="tile tile-coral tile-level" type="button"><span class="t-title">1-daraja</span></button>
       <button class="tile tile-coral tile-level" type="button"><span class="t-title">2-daraja</span></button>
@@ -123,6 +121,20 @@
       <button class="tile tile-coral tile-level" type="button"><span class="t-title">5-daraja</span></button>
       <button class="tile tile-coral tile-level" type="button"><span class="t-title">6-daraja</span></button>
     </div>
+  </section>
+  <section class="panel" id="p-lugat" hidden>
+    <a class="btn" href="topik-sozlar.html?v=3"><span>TOPIK II · Lug'at</span><span class="btn-arrow">›</span></a>
+    <a class="btn btn-yellow" href="essential.html?v=3"><span>Essential Korean Words 2000<small>Boshlang'ich · O'rta · Yuqori</small></span><span class="btn-arrow">›</span></a>
+    <a class="btn" href="hancha.html?v=16" style="background:linear-gradient(90deg,#1f4e78,#3d7fb5);box-shadow:0 10px 0 #0d2a44;"><span>2000 hancha so'zlar<small>한자 어휘 2000</small></span><span class="btn-arrow">›</span></a>
+    <a class="btn" href="topik.html?v=1" style="background:linear-gradient(90deg,#534AB7,#7F77DD);box-shadow:0 5px 0 #26215C !important;"><span>TOPIK<small>3 daraja</small></span><span class="btn-arrow">›</span></a>
+  </section>
+  <section class="panel" id="p-gap" hidden></section>
+  <section class="panel" id="p-soz" hidden></section>
+  <nav class="bottom" aria-label="Asosiy bo'limlar">
+    <button class="tab on" data-tab="mashq" type="button" aria-selected="true"><span class="chip">🏠</span><span>Mashq</span></button>
+    <button class="tab" data-tab="lugat" type="button" aria-selected="false"><span class="chip">📚</span><span>Lug'atlar</span></button>
+    <button class="tab" data-tab="gap" type="button" aria-selected="false"><span class="chip">💬</span><span>Gaplashish</span></button>
+    <button class="tab" data-tab="soz" type="button" aria-selected="false"><span class="chip">⚙️</span><span>Sozlamalar</span></button>
   </nav>
 
 
@@ -176,28 +188,22 @@
       } catch (e) {}
     }
     window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
-    const openTopik = document.getElementById('openTopik');
-    const topikSub = document.getElementById('topikSub');
-    const openDrawer = document.getElementById('openDrawer');
-    const lugatSub = document.getElementById('lugatSub');
-    openDrawer.addEventListener('click', () => {
-      const open = lugatSub.hasAttribute('hidden');
-      lugatSub.toggleAttribute('hidden', !open);
-      openDrawer.setAttribute('aria-expanded', String(open));
+    document.querySelectorAll('[data-toggle]').forEach(b => {
+      b.addEventListener('click', () => {
+        const sub = document.getElementById(b.dataset.toggle);
+        const open = sub.hasAttribute('hidden');
+        sub.toggleAttribute('hidden', !open);
+        b.setAttribute('aria-expanded', String(open));
+      });
     });
-    const openDarslik = document.getElementById('openDarslik');
-    const darslikSub = document.getElementById('darslikSub');
-    openDarslik.addEventListener('click', () => {
-      const open = darslikSub.hasAttribute('hidden');
-      darslikSub.toggleAttribute('hidden', !open);
-      openDarslik.setAttribute('aria-expanded', String(open));
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => {
+      t.addEventListener('click', () => {
+        tabs.forEach(x => { x.classList.toggle('on', x === t); x.setAttribute('aria-selected', String(x === t)); });
+        document.querySelectorAll('.panel').forEach(p => { p.hidden = p.id !== 'p-' + t.dataset.tab; });
+      });
     });
-    openTopik.addEventListener('click', () => {
-      const open = topikSub.hasAttribute('hidden');
-      topikSub.toggleAttribute('hidden', !open);
-      openTopik.setAttribute('aria-expanded', String(open));
-    });
-    document.querySelectorAll('.btn, .tile').forEach(el => {
+    document.querySelectorAll('.btn, .tile, .tab').forEach(el => {
       el.addEventListener('click', e => {
         playPop();
         if (el.tagName === 'A') {
