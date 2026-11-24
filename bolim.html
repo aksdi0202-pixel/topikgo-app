@@ -294,6 +294,8 @@
     var COUNTS = LEVEL === 'o' ? [10, 9, 9, 9, 9, 9] : LEVEL === 'h' ? [5, 5, 5, 5, 5, 5, 5, 5, 5, 5] : [11, 11, 11, 11, 11, 10];
     var UNIT = LEVEL === 'o' ? 'kun' : LEVEL === 'h' ? 'guruh' : 'qism';
     var LEVEL_NAME = LEVEL === 'o' ? "O'rta · 중급" : LEVEL === 'h' ? "2000 hancha" : "Boshlang'ich · 초급";
+    var BACK = LEVEL === 'o' ? 'orta.html?v=2' : LEVEL === 'b' ? 'boshlangich.html?v=2' : 'beginner.html?v=1';
+    document.getElementById('back').href = BACK;
     var q = parseInt(new URLSearchParams(location.search).get('q'), 10);
     if (!(q >= 1 && q <= COUNTS.length)) q = 1;
     var DARS = parseInt(new URLSearchParams(location.search).get('d'), 10) || ((q - 1) * 5 + 1);
