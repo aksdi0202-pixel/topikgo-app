@@ -499,8 +499,17 @@
       }
     }
 
+    // So'z yasash: so'zlar navbat bilan chiqadi, hammasi tugagach qayta aralashtiriladi
+    var buildQ = [], buildPrev = null;
+    function nextBuildWord() {
+      if (!buildQ.length) buildQ = shuffle(W);
+      var w = buildQ.pop();
+      if (w === buildPrev && buildQ.length) { var t = buildQ[buildQ.length - 1]; buildQ[buildQ.length - 1] = w; w = t; }
+      buildPrev = w;
+      return w;
+    }
     function newRound() {
-      cur = W[Math.floor(Math.random() * W.length)];
+      cur = nextBuildWord();
       seqIdx = [];
       var pool = shuffle(cur[2].concat(shuffle(DISTR).slice(0, 10 - cur[2].length)));
       var box = document.getElementById('tiles');
@@ -923,6 +932,7 @@
         if (nm) mashqBtn.textContent = nm.textContent + ' ▾';
         mashqPanel.classList.remove('open');
         if (a.dataset.mode === 'build') {
+          buildQ = []; buildPrev = null;
           showPractice();
           document.getElementById('quiz').classList.remove('on');
           document.getElementById('game').classList.add('on');
