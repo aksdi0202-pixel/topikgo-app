@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xonaga qo'shilish · TopikGo</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { --bg:#f4f7fb; --text:#1d2433; --muted:#6b7385; --accent:#534AB7; --bad:#b93a2b; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); padding:16px; display:flex; flex-direction:column; align-items:center; }
+  header { width:100%; max-width:420px; display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .back { text-decoration:none; color:#534AB7; font-size:26px; font-weight:700; line-height:1; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:#EEEDFE; border:2px solid #AFA9EC; }
+  h1 { margin:0; font-size:18px; font-weight:800; color:#26215C; }
+  .card { width:100%; max-width:420px; background:#fff; border-radius:16px; padding:20px 16px; box-shadow:0 4px 14px rgba(31,45,80,.08); }
+  p.label { margin:0 0 10px; font-weight:700; font-size:17px; text-align:center; }
+  input { width:100%; font-size:32px; font-weight:800; letter-spacing:8px; text-align:center; padding:12px; border-radius:14px; border:2px solid #AFA9EC; color:#26215C; }
+  button { width:100%; font-size:17px; padding:14px; border-radius:14px; border:none; background:var(--accent); color:#fff; font-weight:600; cursor:pointer; margin-top:14px; }
+  .msg { min-height:20px; color:var(--bad); font-size:14px; text-align:center; margin-top:10px; }
+</style>
+</head>
+<body>
+  <header>
+    <a class="back" href="index.html?v=3" aria-label="Orqaga">‹</a>
+    <h1>Xonaga qo'shilish</h1>
+  </header>
+  <div class="card">
+    <p class="label">O'qituvchi bergan kodni kiriting</p>
+    <input type="text" id="code" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off">
+    <button type="button" id="goBtn">Kirish</button>
+    <p class="msg" id="msg"></p>
+  </div>
+  <script>
+    try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
+    const $ = id => document.getElementById(id);
+    function go() {
+      const code = $('code').value.replace(/\D/g, '');
+      if (code.length !== 4) { $('msg').textContent = "4 xonali kodni kiriting"; return; }
+      location.href = 'join.html?room=' + code;
+    }
+    $('goBtn').onclick = go;
+    $('code').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    $('code').focus();
+  </script>
+</body>
+</html>
