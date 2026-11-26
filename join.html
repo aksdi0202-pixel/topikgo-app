@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="hanja-data.js?v=16"></script>
-<script src="bellashuv-core.js?v=1"></script>
+<script src="bellashuv-core.js?v=2"></script>
 <style>
   :root { --bg:#f4f7fb; --text:#1d2433; --muted:#6b7385; --accent:#534AB7; --ok:#1D9E75; --bad:#b93a2b; }
   * { box-sizing: border-box; }
@@ -91,6 +91,7 @@
       <p style="font-size:20px;font-weight:700;margin:0 0 8px;">O'yin tugadi</p>
       <div class="big" id="finalScore"></div>
       <p class="rank" id="finalRank"></p>
+      <div id="podium"></div>
       <ul class="top" id="finalTop"></ul>
       <p style="color:var(--muted);">Ballaringiz saqlandi.</p>
     </div>
@@ -101,7 +102,6 @@
   const params = new URLSearchParams(location.search);
   const CODE = params.get('room');
   const MAX_SCORE = 100;
-  const Q_PER_STAGE = 20;
   const GAP_MS = 1500;     // javobdan keyin to'g'ri javob ko'rsatiladigan vaqt
   const BREAK_MS = 12000;  // bosqich oralig'idagi reyting vaqti
 
@@ -177,23 +177,22 @@
   // Bosqich: 20 savol, har savol T soniya javob + GAP_MS to'g'ri javob.
   // Bosqichlar orasida BREAK_MS reyting. 3-bosqich tugagach final.
   function timeline(now) {
-    const T = (room.time || 5) * 1000;
-    const SLOT = T + GAP_MS;
-    const STAGE_LEN = Q_PER_STAGE * SLOT;
-    const PERIOD = STAGE_LEN + BREAK_MS;
-    const t = now - room.game.s1;
+    const T = (room.time || 5) * 1000, SLOT = T + GAP_MS;
+    const counts = room.game.counts;
+    let t = now - room.game.s1;
     if (t < 0) return { phase: 'lead', left: -t };
-    const stage = Math.floor(t / PERIOD) + 1;
-    if (stage > 3) return { phase: 'end' };
-    const w = t - (stage - 1) * PERIOD;
-    if (w >= STAGE_LEN) {
-      if (stage === 3) return { phase: 'end' };
-      return { phase: 'break', stage: stage, left: PERIOD - w };
+    for (let k = 0; k < counts.length; k++) {
+      const len = counts[k] * SLOT;
+      if (t < len) {
+        const idx = Math.floor(t / SLOT), r = t - idx * SLOT;
+        return r < T ? { phase: 'ask', stage: k + 1, idx: idx, remain: T - r } : { phase: 'reveal', stage: k + 1, idx: idx };
+      }
+      t -= len;
+      if (k === counts.length - 1) return { phase: 'end' };
+      if (t < BREAK_MS) return { phase: 'break', stage: k + 1, left: BREAK_MS - t };
+      t -= BREAK_MS;
     }
-    const idx = Math.floor(w / SLOT);
-    const r = w - idx * SLOT;
-    if (r < T) return { phase: 'ask', stage: stage, idx: idx, remain: T - r };
-    return { phase: 'reveal', stage: stage, idx: idx };
+    return { phase: 'end' };
   }
 
   // ---------- O'yin ----------
@@ -255,7 +254,7 @@
 
   function renderQuestion(q, stage, idx) {
     show('sPlay');
-    $('progress').textContent = stage + '-bosqich · ' + (idx + 1) + '/' + Q_PER_STAGE;
+    $('progress').textContent = stage + '-bosqich · ' + (idx + 1) + '/' + room.game.counts[stage - 1];
     $('scoreTxt').textContent = 'Ball: ' + game.score;
     $('prompt').textContent = q.prompt;
     $('feedback').className = 'feedback';
@@ -368,6 +367,7 @@
     $('finalScore').textContent = game.score;
     $('finalRank').textContent = rankText(info);
     $('finalTop').innerHTML = topHtml(info.list);
+    $('podium').innerHTML = bellPodium(info.list);
   }
 </script>
 </body>

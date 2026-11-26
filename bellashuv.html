@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="hanja-data.js?v=16"></script>
-<script src="bellashuv-core.js?v=1"></script>
+<script src="bellashuv-core.js?v=2"></script>
 <style>
   :root { --bg:#f4f7fb; --text:#1d2433; --muted:#6b7385; --accent:#534AB7; }
   * { box-sizing: border-box; }
@@ -23,12 +23,14 @@
   .btn3d { position:relative; display:block; width:100%; border:2px solid rgba(150,235,255,.9); border-radius:22px; padding:16px 14px; color:#fff; font-family:inherit; font-size:16px; font-weight:700; text-align:center; cursor:pointer; overflow:hidden; background:linear-gradient(90deg,#005ae6,#00bfff); box-shadow:0 8px 0 #0a2878, 0 0 16px rgba(0,170,255,.55), inset 0 1px 0 rgba(255,255,255,.45); transition:transform .12s ease, box-shadow .12s ease; }
   .btn3d::before { content:""; position:absolute; left:12px; right:12px; top:6px; height:44%; border-radius:16px; background:linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,.05)); pointer-events:none; }
   .btn3d:active { transform:translateY(6px); box-shadow:0 2px 0 #0a2878, 0 0 12px rgba(0,170,255,.4); }
+  .btn3d:disabled { opacity:.5; }
   .btn3d.purple { background:linear-gradient(90deg,#534AB7,#7F77DD); border-color:rgba(200,195,255,.9); box-shadow:0 8px 0 #26215C, 0 0 16px rgba(127,119,221,.6), inset 0 1px 0 rgba(255,255,255,.45); }
   .btn3d.purple:active { box-shadow:0 2px 0 #26215C, 0 0 12px rgba(127,119,221,.4); }
   .btn3d.light { background:#fff; color:#26215C; border-color:#7F77DD; box-shadow:0 8px 0 #c9d3e0, 0 0 14px rgba(127,119,221,.35); }
   .btn3d.light:active { box-shadow:0 2px 0 #c9d3e0, 0 0 10px rgba(127,119,221,.3); }
   .btn3d small { display:block; font-size:12px; font-weight:600; opacity:.85; margin-top:4px; }
   .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .row label { display:flex; flex-direction:column; gap:4px; font-size:14px; }
   select, button { font-size:16px; padding:10px 14px; border-radius:12px; border:1px solid #c9d3e0; }
   button.primary { background:var(--accent); color:#fff; border:none; font-weight:600; cursor:pointer; }
   button.ghost { background:#fff; cursor:pointer; }
@@ -73,6 +75,25 @@
         </select>
       </label>
     </div>
+    <div class="row">
+      <label>Savollar soni (umumiy)
+        <select id="total">
+          <option value="15">15</option>
+          <option value="20" selected>20</option>
+          <option value="30">30</option>
+          <option value="40">40</option>
+        </select>
+      </label>
+      <label>Bosqichlar soni
+        <select id="stages">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+        </select>
+      </label>
+    </div>
+    <div class="row" id="stageTypes"></div>
     <div class="row" style="display:block;"><button class="btn3d purple" id="createBtn" type="button">Xona yaratish</button></div>
     <p class="msg" id="msg"></p>
   </div>
@@ -89,6 +110,7 @@
       <button class="btn3d" id="startBtn" type="button">Boshlash</button>
       <button class="btn3d light" id="endBtn" type="button">Yakunlash</button>
     </div>
+    <div id="podium"></div>
     <p class="msg" id="roomMsg"></p>
   </div>
 
@@ -163,108 +185,167 @@
   const qParam = Number(new URLSearchParams(location.search).get('q'));
   if (qParam) showGroup(qParam);
 
+  // Bosqich turlari: har bosqich uchun ro'yxatdan tanlanadi
+  const STAGE_TYPE_LABELS = { kor2uz: 'Koreyscha → Uzbekcha', uz2kor: 'Uzbekcha → Koreyscha', tiles: "Yig'ish", typed: 'Yozish' };
+  const DEFAULT_TYPES = ['kor2uz', 'uz2kor', 'tiles', 'typed'];
+  function renderStageTypes() {
+    const n = Number($('stages').value);
+    const opts = Object.entries(STAGE_TYPE_LABELS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+    $('stageTypes').innerHTML = Array.from({ length: n }, (_, i) =>
+      `<label>${i + 1}-bosqich<select id="st${i}">${opts}</select></label>`).join('');
+    for (let i = 0; i < n; i++) $('st' + i).value = DEFAULT_TYPES[i];
+  }
+  $('stages').onchange = renderStageTypes;
+  renderStageTypes();
+
+  // Umumiy savollar bosqichlarga teng bo'linadi (oxirgisiga qoldig'i)
+  function calcCounts(total, n) {
+    const per = Math.floor(total / n);
+    const arr = Array(n).fill(per);
+    arr[n - 1] += total - per * n;
+    return arr;
+  }
+
   let db = null, roomRef = null, code = null;
   try { db = BELL.init(); }
   catch (e) { $('msg').textContent = e.message; }
 
   // ---------- Bir vaqtli o'yin (o'quvchi sahifasi bilan bir xil vaqt jadvali) ----------
-  const Q_PER_STAGE = 20, GAP_MS = 1500, BREAK_MS = 12000, LEAD_MS = 5000;
+  const GAP_MS = 1500, BREAK_MS = 12000, LEAD_MS = 5000;
   let serverOffset = 0;
   const serverNow = () => Date.now() + serverOffset;
   if (db) db.ref('.info/serverTimeOffset').on('value', s => { serverOffset = s.val() || 0; });
-  let roomLessons = [], roomLevel = 1, roomTime = 5;
-  let s1 = 0, gameQs = null, qs3Timer = null, phaseTimer = null;
+  let roomLessons = [], roomLevel = 1, roomTime = 5, roomCounts = [];
+  let s1 = 0, gameQs = null, phaseTimer = null, stageTimers = [], podiumShown = false, lastList = [];
   const clean = x => JSON.parse(JSON.stringify(x));
 
+  // k-bosqich tugashi (oxirgi savol vaqti tugagan payt)
+  function endOf(k) {
+    const SLOT = roomTime * 1000 + GAP_MS;
+    let t = s1;
+    for (let j = 0; j < k; j++) t += roomCounts[j] * SLOT;
+    return t + (k - 1) * BREAK_MS;
+  }
+
   function timeline(now) {
-    const T = roomTime * 1000, SLOT = T + GAP_MS, STAGE_LEN = Q_PER_STAGE * SLOT, PERIOD = STAGE_LEN + BREAK_MS;
-    const t = now - s1;
+    const T = roomTime * 1000, SLOT = T + GAP_MS;
+    let t = now - s1;
     if (t < 0) return { phase: 'lead', left: -t };
-    const stage = Math.floor(t / PERIOD) + 1;
-    if (stage > 3) return { phase: 'end' };
-    const w = t - (stage - 1) * PERIOD;
-    if (w >= STAGE_LEN) return stage === 3 ? { phase: 'end' } : { phase: 'break', stage: stage, left: PERIOD - w };
-    const idx = Math.floor(w / SLOT);
-    const r = w - idx * SLOT;
-    if (r < T) return { phase: 'ask', stage: stage, idx: idx };
-    return { phase: 'reveal', stage: stage, idx: idx };
+    for (let k = 0; k < roomCounts.length; k++) {
+      const len = roomCounts[k] * SLOT;
+      if (t < len) {
+        const idx = Math.floor(t / SLOT), r = t - idx * SLOT;
+        return r < T ? { phase: 'ask', stage: k + 1, idx: idx, remain: T - r } : { phase: 'reveal', stage: k + 1, idx: idx };
+      }
+      t -= len;
+      if (k === roomCounts.length - 1) return { phase: 'end' };
+      if (t < BREAK_MS) return { phase: 'break', stage: k + 1, left: BREAK_MS - t };
+      t -= BREAK_MS;
+    }
+    return { phase: 'end' };
   }
 
   function phaseText() {
     if (!s1) return '';
     const st = timeline(serverNow());
     if (st.phase === 'lead') return "Boshlanishiga " + Math.ceil(st.left / 1000) + " soniya";
-    if (st.phase === 'ask') return st.stage + "-bosqich · savol " + (st.idx + 1) + "/" + Q_PER_STAGE;
+    if (st.phase === 'ask') return st.stage + "-bosqich · savol " + (st.idx + 1) + "/" + roomCounts[st.stage - 1];
     if (st.phase === 'reveal') return st.stage + "-bosqich · to'g'ri javob ko'rsatilmoqda";
     if (st.phase === 'break') return st.stage + "-bosqich tugadi · reyting (" + Math.ceil(st.left / 1000) + " s)";
     return "O'yin tugadi";
   }
 
-  function makeStage12(stage, pool, exclude) {
+  // Savollar ro'yxati turga qarab tuziladi
+  function makeQs(type, n, list, pool) {
     const cfg = BELL.LEVELS[roomLevel];
-    const field = stage === 1 ? 'uz' : 'kor';
-    const prompt = stage === 1 ? 'kor' : 'uz';
-    const avail = BELL.shuffle(pool.filter(w => !exclude.has(w.kor)));
-    const picks = avail.slice(0, Q_PER_STAGE);
-    while (picks.length < Q_PER_STAGE && pool.length) picks.push(BELL.shuffle(pool)[0]);
+    let t = type;
+    if (t === 'tiles' && cfg.typed) t = 'typed';   // Yuqori darajada yig'ish yo'q, yozish bo'ladi
+    const picks = list.slice(0, n);
+    while (picks.length < n && pool.length) picks.push(BELL.shuffle(pool)[0]);
     return picks.map(w => {
-      const cands = BELL.shuffle(pool.filter(x => x[field] !== w[field]));
-      const seen = new Set([w[field]]);
-      const wrong = [];
-      for (const x of cands) { if (!seen.has(x[field])) { seen.add(x[field]); wrong.push(x[field]); } if (wrong.length === cfg.opts - 1) break; }
-      return { type: 'choice', stage: stage, prompt: w[prompt], options: BELL.shuffle([w[field], ...wrong]), answer: w[field], item: w };
-    });
-  }
-
-  // 3-bosqich: avval 1–2 bosqichda xato qilingan so'zlar, keyin qolganlari
-  function makeStage3(pool, wrongKors) {
-    const cfg = BELL.LEVELS[roomLevel];
-    const wrongs = pool.filter(w => wrongKors.has(w.kor));
-    const rest = BELL.shuffle(pool.filter(w => !wrongKors.has(w.kor)));
-    const list = BELL.shuffle(wrongs).concat(rest).slice(0, Q_PER_STAGE);
-    return list.map(w => {
-      if (cfg.typed) return { type: 'typed', stage: 3, prompt: w.uz, answer: w.kor, item: w };
+      if (t === 'kor2uz' || t === 'uz2kor') {
+        const field = t === 'kor2uz' ? 'uz' : 'kor';
+        const prompt = t === 'kor2uz' ? 'kor' : 'uz';
+        const seen = new Set([w[field]]), wrong = [];
+        for (const x of BELL.shuffle(pool)) {
+          if (!seen.has(x[field])) { seen.add(x[field]); wrong.push(x[field]); }
+          if (wrong.length === cfg.opts - 1) break;
+        }
+        return { type: 'choice', prompt: w[prompt], options: BELL.shuffle([w[field], ...wrong]), answer: w[field], item: w };
+      }
+      if (t === 'typed') return { type: 'typed', prompt: w.uz, answer: w.kor, item: w };
       const syl = BELL.syllables(w.kor);
       const extra = [];
       BELL.shuffle(BELL.allWords().map(x => x.kor)).forEach(k => BELL.syllables(k).forEach(s => { if (!syl.includes(s) && !extra.includes(s)) extra.push(s); }));
-      const tiles = BELL.shuffle([...syl, ...extra.slice(0, cfg.tiles - syl.length)]);
-      return { type: 'tiles', stage: 3, prompt: w.uz, answer: w.kor, syl: syl, tiles: tiles, item: w };
+      const tiles = BELL.shuffle([...syl, ...extra.slice(0, Math.max(0, cfg.tiles - syl.length))]);
+      return { type: 'tiles', prompt: w.uz, answer: w.kor, syl: syl, tiles: tiles, item: w };
     });
   }
 
-  function scheduleStage3() {
-    const SLOT = roomTime * 1000 + GAP_MS, STAGE_LEN = Q_PER_STAGE * SLOT, PERIOD = STAGE_LEN + BREAK_MS;
-    clearTimeout(qs3Timer);
-    qs3Timer = setTimeout(buildStage3, Math.max(0, s1 + PERIOD + STAGE_LEN - serverNow() + 300));
-  }
-
-  // 2-bosqich tugagach, javoblar asosida 3-bosqich savollari tuziladi
-  async function buildStage3() {
+  // 1 va 2-bosqich: oldindan tayyor. 3+ bosqich: oldingi bosqichlarda xato qilingan so'zlar birinchi
+  async function buildStage(k) {
     if (!roomRef || !gameQs) return;
-    const snap = await roomRef.child('answers').once('value');
-    const ans = snap.val() || {};
-    const wrongKors = new Set();
-    [1, 2].forEach(stage => gameQs[stage].forEach((q, idx) => {
-      const a = ans['s' + stage + '_' + idx] || {};
-      if (Object.values(a).some(v => v === false)) wrongKors.add(q.item.kor);
-    }));
-    await roomRef.child('game/qs3').set(clean(makeStage3(gameQs.pool, wrongKors)));
+    let list;
+    if (k === 1) {
+      list = BELL.shuffle(gameQs.pool);
+    } else if (k === 2) {
+      const used = new Set(gameQs[1].map(q => q.item.kor));
+      list = BELL.shuffle(gameQs.pool.filter(w => !used.has(w.kor))).concat(BELL.shuffle(gameQs.pool));
+    } else {
+      const snap = await roomRef.child('answers').once('value');
+      const ans = snap.val() || {};
+      const wrongKors = new Set();
+      for (let s = 1; s < k; s++) {
+        gameQs[s].forEach((q, idx) => {
+          const a = ans['s' + s + '_' + idx] || {};
+          if (Object.values(a).some(v => v === false)) wrongKors.add(q.item.kor);
+        });
+      }
+      const pool = gameQs.pool;
+      list = BELL.shuffle(pool.filter(w => wrongKors.has(w.kor)))
+        .concat(BELL.shuffle(pool.filter(w => !wrongKors.has(w.kor))));
+    }
+    const qs = makeQs(gameQs.types[k - 1], roomCounts[k - 1], list, gameQs.pool);
+    gameQs[k] = qs;
+    await roomRef.child('game/qs' + k).set(clean(qs));
   }
 
-  $('startBtn').onclick = () => {
+  function scheduleStages() {
+    stageTimers.forEach(clearTimeout);
+    stageTimers = [];
+    for (let s = 3; s <= roomCounts.length; s++) {
+      const delay = endOf(s - 1) + 300 - serverNow();
+      stageTimers.push(setTimeout(() => buildStage(s), Math.max(0, delay)));
+    }
+  }
+
+  $('startBtn').onclick = async () => {
     if (!roomRef || s1) return;
     const pool = BELL.pool(roomLessons);
     if (!pool.length) { $('roomMsg').textContent = "Bo'limlar topilmadi"; return; }
-    const qs1 = makeStage12(1, pool, new Set());
-    const qs2 = makeStage12(2, pool, new Set(qs1.map(q => q.item.kor)));
-    gameQs = { 1: qs1, 2: qs2, pool: pool };
+    const n = Number($('stages').value);
+    roomCounts = calcCounts(Number($('total').value), n);
+    const types = Array.from({ length: n }, (_, i) => $('st' + i).value);
+    gameQs = { pool: pool, types: types };
     s1 = serverNow() + LEAD_MS;
-    roomRef.update({ status: 'started', game: clean({ s1: s1, qs1: qs1, qs2: qs2 }) });
-    scheduleStage3();
+    await buildStage(1);
+    if (n >= 2) await buildStage(2);
+    await roomRef.update({
+      status: 'started',
+      game: clean({ s1: s1, counts: roomCounts, qs1: gameQs[1], qs2: gameQs[2] || null })
+    });
+    scheduleStages();
     $('startBtn').disabled = true;
     $('roomMsg').textContent = "O'yin boshlandi. Hamma bir vaqtda boshlaydi.";
     clearInterval(phaseTimer);
-    phaseTimer = setInterval(() => { $('phase').textContent = phaseText(); }, 300);
+    phaseTimer = setInterval(() => {
+      const st = timeline(serverNow());
+      $('phase').textContent = phaseText();
+      if (st.phase === 'end' && !podiumShown && lastList.length) {
+        podiumShown = true;
+        $('podium').innerHTML = bellPodium(lastList);
+      }
+    }, 300);
   };
 
   $('createBtn').onclick = async () => {
@@ -307,6 +388,7 @@
       const list = [];
       snap.forEach(ch => list.push(ch.val()));
       list.sort((a, b) => (b.score || 0) - (a.score || 0));
+      lastList = list.map(p => ({ name: p.name || '', avatar: p.avatar || '', score: p.score || 0 }));
       $('count').textContent = list.length;
       $('players').innerHTML = list.map(p =>
         `<li><span>${p.avatar} ${escapeHtml(p.name)}</span><strong>${p.score || 0}</strong></li>`).join('');

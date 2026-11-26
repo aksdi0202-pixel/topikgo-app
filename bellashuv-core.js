@@ -56,3 +56,35 @@ const BELL = {
     return String(Math.floor(1000 + Math.random() * 9000));
   }
 };
+
+// Final animatsiya: 1–3-o'rin podiumda (xursand → xafa → yanada xafa), qolganlar pastda yig'laydi
+function bellPodium(list) {
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  const style = '<style>' +
+    '.bp-row{display:flex;align-items:flex-end;justify-content:center;gap:8px;height:200px;}' +
+    '.bp-col{display:flex;flex-direction:column;align-items:center;width:30%;}' +
+    '.bp-av{font-size:38px;position:relative;animation:bpIn .6s ease-out both;}' +
+    '.bp-face{position:absolute;right:-14px;bottom:-6px;font-size:20px;}' +
+    '.bp-name{font-size:13px;font-weight:700;margin:4px 0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}' +
+    '.bp-block{width:100%;border-radius:10px 10px 0 0;display:flex;align-items:flex-start;justify-content:center;color:#fff;font-weight:800;font-size:22px;padding-top:6px;transform-origin:bottom;animation:bpRise .8s ease-out both;}' +
+    '.bp-1 .bp-block{height:150px;background:#EF9F27;}' +
+    '.bp-2 .bp-block{height:110px;background:#7F77DD;animation-delay:.25s;}' +
+    '.bp-3 .bp-block{height:80px;background:#9aa3b5;animation-delay:.5s;}' +
+    '.bp-1 .bp-av{animation:bpIn .6s ease-out both, bpBounce 1s ease-in-out .8s infinite;}' +
+    '.bp-rest{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px;}' +
+    '.bp-sad{position:relative;font-size:30px;animation:bpIn .6s ease-out both;}' +
+    '.bp-sad .bp-face{font-size:16px;}' +
+    '.bp-tear{position:absolute;left:50%;top:55%;font-size:12px;animation:bpTear 1.4s ease-in infinite;}' +
+    '@keyframes bpRise{from{transform:scaleY(0)}to{transform:scaleY(1)}}' +
+    '@keyframes bpIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}' +
+    '@keyframes bpBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}' +
+    '@keyframes bpTear{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(16px)}}' +
+    '</style>';
+  const top = list.slice(0, 3);
+  const faces = ['😄', '😕', '😞'];
+  const col = (p, i) => p ? `<div class="bp-col bp-${i + 1}"><div class="bp-av">${p.avatar}<span class="bp-face">${faces[i]}</span></div><div class="bp-name">${esc(p.name)}</div><div class="bp-block">${i + 1}</div></div>` : '';
+  const row = [1, 0, 2].map(i => col(top[i], i)).join('');
+  const rest = list.slice(3).map((p, i) =>
+    `<div class="bp-sad" style="animation-delay:${(i * 0.1).toFixed(1)}s">${p.avatar}<span class="bp-face">😭</span><span class="bp-tear">💧</span></div>`).join('');
+  return style + `<div class="bp-row">${row}</div>` + (rest ? `<div class="bp-rest">${rest}</div>` : '');
+}
