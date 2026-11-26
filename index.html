@@ -34,6 +34,8 @@
   .tile-coral { background: #FAECE7; color: #4A1B0C; border-color: #F0997B; box-shadow: 0 6px 0 #F5C4B3; }
   .tile-coral small { color: #993C1D; }
   .tile-wide { grid-column: 1 / -1; }
+  .tile.led { background: #fff; color: var(--d); border: 2px solid var(--c); box-shadow: 0 0 0 1px var(--c), 0 0 16px var(--g); }
+  .tile.led small { color: var(--c); }
   .sub { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .sub[hidden] { display: none !important; }
   .sub-3 { grid-template-columns: 1fr 1fr 1fr; }
@@ -125,9 +127,9 @@
   <img class="logo" src="logo.png" alt="TopikGo" width="260">
   <p class="sub">Koreys tili lug'ati</p>
   <section class="menu panel" id="p-mashq">
-    <a class="tile tile-blue" href="beginner.html?v=1"><span class="t-title">TOPIK I</span><small>1–2-daraja</small></a>
-    <a class="tile tile-purple" href="topik2.html?v=1"><span class="t-title">TOPIK II</span><small>3–6-daraja</small></a>
-    <button class="tile tile-coral tile-wide" data-toggle="darslikSub" type="button" aria-expanded="false" aria-controls="darslikSub"><span class="t-title">TOPIK Darslik</span><small>1 dan 6 gacha</small></button>
+    <a class="tile led" style="--c:#7F77DD;--g:rgba(127,119,221,.45);--d:#26215C;" href="beginner.html?v=1"><span class="t-title">TOPIK I</span><small>1–2-daraja</small></a>
+    <a class="tile led" style="--c:#1D9E75;--g:rgba(29,158,117,.45);--d:#04342C;" href="topik2.html?v=1"><span class="t-title">TOPIK II</span><small>3–6-daraja</small></a>
+    <button class="tile led tile-wide" style="--c:#D85A30;--g:rgba(216,90,48,.45);--d:#4A1B0C;" data-toggle="darslikSub" type="button" aria-expanded="false" aria-controls="darslikSub"><span class="t-title">TOPIK Darslik</span><small>1 dan 6 gacha</small></button>
     <div class="sub sub-3" id="darslikSub" hidden>
       <button class="tile tile-coral tile-level" type="button"><span class="t-title">1-daraja</span></button>
       <button class="tile tile-coral tile-level" type="button"><span class="t-title">2-daraja</span></button>
