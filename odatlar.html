@@ -149,6 +149,9 @@ label.lbl{display:block;font-size:13px;font-weight:700;color:var(--muted);margin
   <div class="list" id="list"></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <button class="fab" id="addBtn"><i>+</i> Odat qo'shish</button>
 
 <div class="backdrop" id="backdrop"></div>
@@ -260,20 +263,71 @@ function localRefresh(){
   S.loaded=true; render();
 }
 
+/* Firebase: users/<telegram_id>/habits — boshqa qurilmalarda ham saqlanadi.
+   localStorage tezkor kesh sifatida qoladi (oflaynda ham ishlaydi). */
+const FB_CONFIG = {
+  apiKey: "AIzaSyBuaSb9rso27Ul3uEIzZR0rp8VUswI8CtI",
+  databaseURL: "https://bellashuv-a7b16-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "bellashuv-a7b16"
+};
+let remote=null;
+function remoteWrite(fn){
+  if(!remote) return;
+  try{ Promise.resolve(fn(remote)).catch(()=>toast("Bulutga saqlab bo'lmadi — internetni tekshiring")) }catch(e){}
+}
+
 async function setCount(h,key,n){
   n=Math.max(0,Math.min(999,n));
   const obj=localLoad(); if(!obj[h.id])return;
   obj[h.id].log=obj[h.id].log||{}; obj[h.id].log[key]=n; localSave(obj); localRefresh();
+  remoteWrite(r=>r.child(h.id+"/log/"+key).set(n));
 }
 async function createHabit(data){
   const body={...data,log:{},createdAt:Date.now()};
-  const obj=localLoad(); obj["h"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)]=body; localSave(obj); localRefresh(); return true;
+  const id="h"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const obj=localLoad(); obj[id]=body; localSave(obj); localRefresh();
+  remoteWrite(r=>r.child(id).set(body));
+  return true;
 }
 async function updateHabit(id,data){
-  const obj=localLoad(); if(obj[id]){Object.assign(obj[id],data);localSave(obj);localRefresh()} return true;
+  const obj=localLoad(); if(obj[id]){Object.assign(obj[id],data);localSave(obj);localRefresh()}
+  remoteWrite(r=>r.child(id).update(data));
+  return true;
 }
 async function deleteHabit(id){
   const obj=localLoad(); delete obj[id]; localSave(obj); localRefresh();
+  remoteWrite(r=>r.child(id).remove());
+}
+
+function startSync(){
+  const note=$("note");
+  const showNote=t=>{note.hidden=false;note.textContent=t};
+  let tgUser=null;
+  try{tgUser=Telegram.WebApp.initDataUnsafe.user||null}catch(e){}
+  if(!tgUser||!tgUser.id){showNote("Telegram orqali ochilmagan — odatlar faqat shu qurilmada saqlanadi.");return}
+  if(typeof firebase==="undefined"){showNote("Bulutga ulanib bo'lmadi — odatlar hozircha shu qurilmada saqlanadi.");return}
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    remote=firebase.database().ref("users/"+tgUser.id+"/habits");
+  }catch(e){showNote("Bulutga ulanib bo'lmadi — odatlar hozircha shu qurilmada saqlanadi.");return}
+  const SYNC_KEY="odat-synced-"+tgUser.id;
+  let synced=false; try{synced=localStorage.getItem(SYNC_KEY)==="1"}catch(e){}
+  remote.on("value",snap=>{
+    const val=snap.val();
+    if(!synced){
+      synced=true; try{localStorage.setItem(SYNC_KEY,"1")}catch(e){}
+      // Birinchi marta: shu qurilmadagi odatlarni bulutdagilar bilan birlashtirish
+      const local=localLoad();
+      const merged={...local,...(val||{})};
+      if(Object.keys(local).some(k=>!(val&&val[k]))) remote.set(merged).catch(()=>{});
+      localSave(merged); localRefresh(); return;
+    }
+    localSave(val||{}); localRefresh();
+    if(openSheet===$("daySheet")&&dayCtx) paintDay();
+  },()=>{
+    remote=null;
+    showNote("Bulutdagi ma'lumotlarni o'qib bo'lmadi — odatlar hozircha shu qurilmada saqlanadi.");
+  });
 }
 
 /* ---------- render ---------- */
@@ -418,6 +472,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){S.today=d
 /* ---------- boot ---------- */
 try{Telegram.WebApp.ready();Telegram.WebApp.expand()}catch(e){}
 localRefresh();
+startSync();
 })();
 </script>
 </body>
