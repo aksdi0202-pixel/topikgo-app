@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O'qish testi · TopikGo</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { --ink:#26215C; --muted:#6B7385; --p1:#534AB7; --p2:#7F77DD; --pale:#EEEDFE; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink); background-color: var(--pale);
+    background-image: radial-gradient(#D9D5F7 1.6px, transparent 1.8px); background-size: 26px 26px;
+    padding: 16px 16px 40px;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; }
+  .top { display:flex; align-items:center; gap:12px; }
+  .back {
+    text-decoration: none; color: var(--p1); font-size: 26px; font-weight: 800; line-height: 1;
+    width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+    background: #fff; border: 2px solid var(--p2); box-shadow: 0 4px 0 #C9C4F2; cursor:pointer;
+  }
+  .kicker { color: var(--p1); font-size: 15px; margin: 14px 0 0; font-weight:700; }
+  h1 { font-size: 26px; margin: 2px 0 10px; font-weight: 800; }
+  .bar { display:flex; align-items:center; justify-content:space-between; font-size:14px; font-weight:800; color:var(--p1); margin-top:6px; }
+  .prog { height:10px; background:#fff; border:2px solid var(--p2); border-radius:10px; overflow:hidden; margin-top:8px; }
+  .prog > i { display:block; height:100%; background:var(--p1); width:0; transition:width .25s ease; }
+
+  .card { background:#fff; border:2px solid var(--p2); border-radius:24px; padding:18px; margin-top:16px; box-shadow:0 6px 0 #C9C4F2; }
+  .qno { display:inline-block; width:40px; height:40px; border-radius:50%; background:var(--pale); color:var(--ink);
+    font-weight:800; display:grid; place-items:center; }
+  .qpts { float:right; color:var(--muted); font-weight:700; font-size:14px; margin-top:10px; }
+  .qmatn { color:var(--muted); font-size:15px; line-height:1.5; margin:12px 0 0; white-space:pre-wrap; }
+  .qtext { font-size:19px; line-height:1.5; margin:12px 0 2px; font-weight:700; white-space:pre-wrap; }
+  .qimg { width:100%; border-radius:14px; margin:12px 0; border:2px solid var(--p2); }
+  .opts { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+  .opt { display:flex; align-items:center; gap:12px; text-align:left; width:100%; cursor:pointer; font-family:inherit;
+    background:var(--pale); color:var(--ink); border:2px solid var(--p2); border-radius:18px; padding:14px;
+    font-size:17px; font-weight:700; box-shadow:0 4px 0 #C9C4F2; transition:transform .1s, box-shadow .1s; }
+  .opt:active { transform:translateY(3px); box-shadow:0 0 0 #C9C4F2; }
+  .opt .n { width:30px; height:30px; flex:0 0 30px; border-radius:50%; background:#fff; border:2px solid var(--p1);
+    color:var(--p1); font-weight:800; display:grid; place-items:center; font-size:15px; }
+  .opt img { max-width:100%; border-radius:10px; }
+  .opt.correct { background:#E1F5EE; border-color:#4FBF95; box-shadow:0 4px 0 #9FE1CB; }
+  .opt.correct .n { background:#0F6E56; border-color:#0F6E56; color:#fff; }
+  .opt.wrong { background:#FBE7E7; border-color:#E59B9B; box-shadow:0 4px 0 #F0C4C4; }
+  .opt.wrong .n { background:#B23838; border-color:#B23838; color:#fff; }
+  .opt.lock { pointer-events:none; }
+
+  .nav { display:flex; gap:12px; margin-top:16px; }
+  .btn { flex:1; padding:14px 0; border-radius:18px; border:2px solid var(--p1); background:var(--p1); color:#fff;
+    font-size:17px; font-weight:800; cursor:pointer; font-family:inherit; box-shadow:0 5px 0 #26215C; }
+  .btn.ghost { background:#fff; color:var(--p1); box-shadow:0 5px 0 #C9C4F2; }
+  .btn:active { transform:translateY(3px); box-shadow:none; }
+
+  .done { background:#fff; border:2px solid var(--p2); border-radius:24px; padding:28px 18px; margin-top:16px; text-align:center; box-shadow:0 6px 0 #C9C4F2; }
+  .done .big { font-size:42px; font-weight:800; color:var(--p1); }
+  .src { margin-top:22px; font-size:12px; color:var(--muted); text-align:center; line-height:1.5; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" id="back" aria-label="Orqaga">‹</a>
+    </div>
+    <p class="kicker" id="kicker">한국어능력시험 · 읽기</p>
+    <h1 id="h1">O'qish testi</h1>
+
+    <div id="quiz">
+      <div class="bar"><span id="pos"></span><span id="score"></span></div>
+      <div class="prog"><i id="progbar"></i></div>
+      <div class="card" id="qcard"></div>
+      <div class="nav"><button class="btn" id="next">Keyingi ›</button></div>
+      <p class="src">Manba: TOPIK 기출문제 · NIIED (topik.go.kr) · ta'limiy foydalanish</p>
+    </div>
+
+    <div id="result" class="hidden">
+      <div class="done">
+        <div class="big" id="finalScore"></div>
+        <p id="finalText" style="color:var(--muted);font-weight:700;"></p>
+        <div class="nav">
+          <button class="btn ghost" id="again">Qaytadan</button>
+          <button class="btn" id="home">Testlar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="err" class="hidden">
+      <div class="card"><div class="qtext">Test topilmadi.</div>
+      <p class="qmatn">Bu test uchun O'qish savollari hali qo'shilmagan.</p></div>
+      <div class="nav"><button class="btn" id="home2">‹ Testlar</button></div>
+    </div>
+  </div>
+
+<script src="topik-reading.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const DATA = window.TOPIK_READING || [];
+  const params = new URLSearchParams(location.search);
+  const no = params.get('no');          // test raqami, masalan 102
+  const grade = params.get('grade') || '2'; // 1=TOPIK I, 2=TOPIK II
+  const darajaStr = grade === '1' ? 'TOPIK I' : 'TOPIK II';
+  const HOME = 'topik' + (grade === '1' ? '' : '2') + '.html?v=1';
+
+  let test = DATA.find(t => String(t.test) === String(no) && t.daraja === darajaStr);
+  let i=0, correct=0, answered=false;
+
+  function playPop(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(),g=c.createGain(),t=c.currentTime;
+    o.type='sine'; o.frequency.setValueAtTime(700,t); o.frequency.exponentialRampToValueAtTime(120,t+0.08);
+    g.gain.setValueAtTime(0.5,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.08); o.connect(g).connect(c.destination); o.start(t); o.stop(t+0.09);}catch(e){} }
+
+  function go(url){ location.href = url; }
+
+  if (!test) {
+    $('quiz').classList.add('hidden');
+    $('err').classList.remove('hidden');
+  } else {
+    $('kicker').textContent = darajaStr + ' · 읽기';
+    $('h1').textContent = test.test + '-test · O’qish';
+    render();
+  }
+
+  function render() {
+    answered=false;
+    const q = test.savollar[i];
+    $('pos').textContent = (i+1) + ' / ' + test.savollar.length;
+    $('score').textContent = '✓ ' + correct;
+    $('progbar').style.width = (i/test.savollar.length*100) + '%';
+    $('next').textContent = (i === test.savollar.length-1) ? 'Yakunlash' : 'Keyingi ›';
+
+    let h = '<span class="qno">' + q.no + '</span><span class="qpts">' + (q.ball||'') + ' ball</span>';
+    if (q.matn) h += '<div class="qmatn">' + q.matn + '</div>';
+    if (q.savol) h += '<div class="qtext">' + q.savol + '</div>';
+    if (q.savol_rasm) h += '<img class="qimg" src="' + q.savol_rasm + '" alt="savol" loading="lazy">';
+    h += '<div class="opts">';
+    q.variantlar.forEach((opt,k) => {
+      const inner = q.variant_turi==='image' ? '<img src="'+opt+'" alt="">' : opt;
+      h += '<button class="opt" data-k="'+(k+1)+'"><span class="n">'+(k+1)+'</span><span>'+inner+'</span></button>';
+    });
+    h += '</div>';
+    $('qcard').innerHTML = h;
+    $('qcard').querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => pick(+b.dataset.k)));
+  }
+
+  function pick(k) {
+    if (answered) return; answered=true; playPop();
+    const q = test.savollar[i];
+    $('qcard').querySelectorAll('.opt').forEach(o => {
+      o.classList.add('lock'); const kk=+o.dataset.k;
+      if (kk===q.javob) o.classList.add('correct');
+      else if (kk===k) o.classList.add('wrong');
+    });
+    if (k===q.javob){ correct++; $('score').textContent='✓ '+correct; }
+  }
+
+  function next(){ playPop(); if (i===test.savollar.length-1) return finish(); i++; render(); }
+  function finish(){
+    $('quiz').classList.add('hidden'); $('result').classList.remove('hidden');
+    const total=test.savollar.length, pct=Math.round(correct/total*100);
+    $('finalScore').textContent = correct + ' / ' + total;
+    $('finalText').textContent = 'To’g’ri javoblar: ' + pct + '%';
+  }
+
+  $('next') && $('next').addEventListener('click', next);
+  $('back').addEventListener('click', () => go(HOME));
+  $('again') && $('again').addEventListener('click', () => { i=0; correct=0; $('result').classList.add('hidden'); $('quiz').classList.remove('hidden'); render(); });
+  $('home') && $('home').addEventListener('click', () => go(HOME));
+  $('home2') && $('home2').addEventListener('click', () => go(HOME));
+
+  try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(e){}
+</script>
+</body>
+</html>

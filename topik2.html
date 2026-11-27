@@ -413,7 +413,17 @@
   tabs.read.addEventListener('click', () => { playPop(); showTab('read'); });
   tabs.listen.addEventListener('click', () => { playPop(); showTab('listen'); });
 
-  // Hali tayyor bo'lmagan testlar tugmalari: "Tez orada" xabari
+  // O'qish kartochkasini bosganda — o'sha testning O'qish savollari ochiladi
+  document.querySelectorAll('#readList .card').forEach(card => {
+    const num = (card.querySelector('.num')?.textContent || '').replace('#', '').trim();
+    const head = card.querySelector('.card-head');
+    if (head && num) {
+      head.style.cursor = 'pointer';
+      head.addEventListener('click', () => { playPop(); location.href = 'oqish-test.html?no=' + num + '&grade=2'; });
+    }
+  });
+
+  // Hali tayyor bo'lmagan tugmalar (Tahlil/Tarjima/Lug'at, Tinglash, Yozish): "Tez orada" xabari
   let toastTimer = null;
   document.addEventListener('click', e => {
     const b = e.target.closest('.act, [data-soon-tab]');
