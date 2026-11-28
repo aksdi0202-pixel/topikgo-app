@@ -21,15 +21,16 @@
   .hero-desc { font-size: 13px; color: #5E5A57; line-height: 1.5; margin-bottom: 12px; }
   .badges { display: flex; gap: 8px; flex-wrap: wrap; }
   .badge { background: #FAF6F2; color: #7A563E; font-size: 12px; padding: 5px 10px; border-radius: 999px; border: none; cursor: pointer; }
-  .card { background: #F5DEC8; border-radius: 14px; padding: 12px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
-  .num { width: 40px; height: 40px; border-radius: 50%; background: #FDF6F2; color: #2B2623; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .card { background: #F5EAE1; border-radius: 14px; padding: 12px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+  .num { width: 40px; height: 40px; border-radius: 50%; background: #7A4B2A; color: #FAF6F2; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
   .card-body { flex: 1; min-width: 0; }
   .card-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
   .pills { display: flex; gap: 6px; flex-wrap: wrap; }
-  .pill { background: #2B2623; color: #FDF6F2; font-size: 11px; padding: 4px 9px; border-radius: 999px; border: none; cursor: pointer; }
+  .pill { background: #FAF6F2; color: #7A563E; font-size: 11px; padding: 4px 9px; border-radius: 999px; border: none; cursor: pointer; }
   .arrow { color: #7A4B2A; font-size: 18px; align-self: center; }
-  .tabs { position: fixed; left: 0; right: 0; bottom: 0; background: #FFFFFF; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); border-top: 0.5px solid #F2E4D9; display: flex; gap: 8px; justify-content: space-around; }
-  .tab { flex: 1; max-width: 120px; border: none; background: transparent; color: #5E5A57; font-size: 13px; padding: 8px 18px; border-radius: 999px; cursor: pointer; }
+  .tabs { position: fixed; left: 16px; right: 16px; bottom: calc(12px + env(safe-area-inset-bottom)); background: #FFFFFF; border-radius: 999px; padding: 5px; border: 0.5px solid #F2E4D9; display: flex; justify-content: space-around; z-index: 10; }
+  .tab { flex: 1; border: none; background: transparent; color: #5E5A57; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 16px; border-radius: 999px; font-family: inherit; font-size: 12px; cursor: pointer; }
+  .tab .ico { font-size: 16px; line-height: 1; }
   .tab.active { background: #F5EAE1; color: #6E4224; font-weight: 500; }
   .toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); background: #1F1F1F; color: #FAF6F2; font-size: 13px; padding: 10px 16px; border-radius: 10px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 1; }
@@ -61,16 +62,16 @@
   <div id="list"></div>
 </div>
 
-<div class="tabs">
-  <button class="tab active" id="tabRead" onclick="setSection('read')">&#128214; O'qish</button>
-  <button class="tab" id="tabListen" onclick="setSection('listen')">&#127911; Tinglash</button>
-  <button class="tab" id="tabWrite" onclick="setSection('write')">&#9998; Yozish</button>
-</div>
+<nav class="tabs" id="tabsNav">
+  <button class="tab active" id="tabRead" onclick="setSection('read')"><span class="ico">&#128214;</span><span class="lbl">O'qish</span></button>
+  <button class="tab" id="tabListen" onclick="setSection('listen')"><span class="ico">&#127911;</span><span class="lbl">Eshitish</span></button>
+  <button class="tab" id="tabWrite" onclick="setSection('write')"><span class="ico">&#9998;</span><span class="lbl">Yozish</span></button>
+</nav>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  var TESTS = [66, 83, 88, 91, 96, 97];
+  var TESTS = [35, 36, 37, 41, 47, 52, 60, 64, 83, 91, 96, 102];
   var section = 'read';
   var asc = true;
 
@@ -81,12 +82,12 @@
       html += '<div class="card" onclick="openTest(' + n + ')">' +
         '<span class="num">#' + n + '</span>' +
         '<div class="card-body">' +
-          '<div class="card-title">TOPIK II Test #' + n + '</div>' +
+          '<div class="card-title">제' + n + '회 한국어능력시험</div>' +
           '<div class="pills">' +
-            '<button class="pill" onclick="event.stopPropagation(); soon()">izoh</button>' +
-            '<button class="pill" onclick="event.stopPropagation(); soon()">tarjima</button>' +
-            '<button class="pill" onclick="event.stopPropagation(); soon()">so\'zlar</button>' +
-            '<button class="pill" onclick="event.stopPropagation(); soon()">grammatika</button>' +
+            '<button class="pill" onclick="event.stopPropagation(); soon()">Izoh</button>' +
+            '<button class="pill" onclick="event.stopPropagation(); soon()">Tarjima</button>' +
+            '<button class="pill" onclick="event.stopPropagation(); soon()">So\'zlar</button>' +
+            '<button class="pill" onclick="event.stopPropagation(); soon()">Grammatika</button>' +
           '</div>' +
         '</div>' +
         '<span class="arrow">&#8250;</span>' +
@@ -97,13 +98,14 @@
 
   function setSection(s) {
     section = s;
-    var names = { read: "O'qish", listen: 'Tinglash', write: 'Yozish' };
+    var names = { read: "O'qish", listen: 'Eshitish', write: 'Yozish' };
     var icons = { read: '&#128214;', listen: '&#127911;', write: '&#9998;' };
     var descs = {
       read: "Mashq to'plamini tanlang va o'qish bo'limini davom ettiring.",
-      listen: "Mashq to'plamini tanlang va tinglash bo'limini davom ettiring.",
+      listen: "Mashq to'plamini tanlang va eshitish bo'limini davom ettiring.",
       write: "Mashq to'plamini tanlang va yozish bo'limini davom ettiring."
     };
+    document.getElementById('tabsNav').dataset.active = s;
     document.getElementById('tabRead').classList.toggle('active', s === 'read');
     document.getElementById('tabListen').classList.toggle('active', s === 'listen');
     document.getElementById('tabWrite').classList.toggle('active', s === 'write');
