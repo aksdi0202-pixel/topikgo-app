@@ -96,15 +96,20 @@
 
   function setSection(s) {
     section = s;
-    var read = s === 'read';
-    document.getElementById('tabRead').classList.toggle('active', read);
-    document.getElementById('tabListen').classList.toggle('active', !read);
-    document.getElementById('heroIcon').innerHTML = read ? '&#128214;' : '&#127911;';
-    document.getElementById('heroTitle').textContent = (read ? 'O\'qish' : 'Tinglash') + ' • 12 ta test';
-    document.getElementById('heroDesc').textContent = read
-      ? 'Mashq to\'plamini tanlang va o\'qish bo\'limini davom ettiring.'
-      : 'Mashq to\'plamini tanlang va tinglash bo\'limini davom ettiring.';
-    document.getElementById('heroBadgeType').textContent = read ? 'O\'qish' : 'Tinglash';
+    var names = { read: "O'qish", listen: 'Tinglash', write: 'Yozish' };
+    var icons = { read: '&#128214;', listen: '&#127911;', write: '&#9998;' };
+    var descs = {
+      read: "Mashq to'plamini tanlang va o'qish bo'limini davom ettiring.",
+      listen: "Mashq to'plamini tanlang va tinglash bo'limini davom ettiring.",
+      write: "Mashq to'plamini tanlang va yozish bo'limini davom ettiring."
+    };
+    document.getElementById('tabRead').classList.toggle('active', s === 'read');
+    document.getElementById('tabListen').classList.toggle('active', s === 'listen');
+    document.getElementById('tabWrite').classList.toggle('active', s === 'write');
+    document.getElementById('heroIcon').innerHTML = icons[s];
+    document.getElementById('heroTitle').textContent = names[s] + ' \u2022 12 ta test';
+    document.getElementById('heroDesc').textContent = descs[s];
+    document.getElementById('heroBadgeType').textContent = names[s];
   }
 
   function toggleSort() { asc = !asc; render(); }
