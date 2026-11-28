@@ -21,12 +21,12 @@
   .hero-desc { font-size: 13px; color: #5E5A57; line-height: 1.5; margin-bottom: 12px; }
   .badges { display: flex; gap: 8px; flex-wrap: wrap; }
   .badge { background: #FAF6F2; color: #7A563E; font-size: 12px; padding: 5px 10px; border-radius: 999px; border: none; cursor: pointer; }
-  .card { background: #F5EAE1; border-radius: 14px; padding: 12px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
-  .num { width: 40px; height: 40px; border-radius: 50%; background: #7A4B2A; color: #FAF6F2; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .card { background: #F5DEC8; border-radius: 14px; padding: 12px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+  .num { width: 40px; height: 40px; border-radius: 50%; background: #FDF6F2; color: #2B2623; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
   .card-body { flex: 1; min-width: 0; }
   .card-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
   .pills { display: flex; gap: 6px; flex-wrap: wrap; }
-  .pill { background: #FAF6F2; color: #7A563E; font-size: 11px; padding: 4px 9px; border-radius: 999px; border: none; cursor: pointer; }
+  .pill { background: #2B2623; color: #FDF6F2; font-size: 11px; padding: 4px 9px; border-radius: 999px; border: none; cursor: pointer; }
   .arrow { color: #7A4B2A; font-size: 18px; align-self: center; }
   .tabs { position: fixed; left: 0; right: 0; bottom: 0; background: #FFFFFF; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); border-top: 0.5px solid #F2E4D9; display: flex; gap: 8px; justify-content: space-around; }
   .tab { flex: 1; max-width: 120px; border: none; background: transparent; color: #5E5A57; font-size: 13px; padding: 8px 18px; border-radius: 999px; cursor: pointer; }
@@ -70,7 +70,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  var TESTS = [35, 36, 37, 41, 42, 47];
+  var TESTS = [66, 83, 88, 91, 96, 97];
   var section = 'read';
   var asc = true;
 
@@ -81,11 +81,12 @@
       html += '<div class="card" onclick="openTest(' + n + ')">' +
         '<span class="num">#' + n + '</span>' +
         '<div class="card-body">' +
-          '<div class="card-title">제' + n + '회 한국어능력시험</div>' +
+          '<div class="card-title">TOPIK II Test #' + n + '</div>' +
           '<div class="pills">' +
-            '<button class="pill" onclick="event.stopPropagation(); soon()">Izoh</button>' +
-            '<button class="pill" onclick="event.stopPropagation(); soon()">Tarjima</button>' +
-            '<button class="pill" onclick="event.stopPropagation(); soon()">So\'zlar</button>' +
+            '<button class="pill" onclick="event.stopPropagation(); soon()">izoh</button>' +
+            '<button class="pill" onclick="event.stopPropagation(); soon()">tarjima</button>' +
+            '<button class="pill" onclick="event.stopPropagation(); soon()">so\'zlar</button>' +
+            '<button class="pill" onclick="event.stopPropagation(); soon()">grammatika</button>' +
           '</div>' +
         '</div>' +
         '<span class="arrow">&#8250;</span>' +
